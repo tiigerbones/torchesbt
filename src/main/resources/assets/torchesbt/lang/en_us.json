@@ -1,0 +1,28 @@
+{
+  "item.torchesbt.unlit_torch": "Torch",
+  "item.torchesbt.wall_unlit_torch": "Torch",
+  "block.torchesbt.unlit_torch": "Torch",
+  "block.torchesbt.wall_unlit_torch": "Torch",
+
+  "item.torchesbt.unlit_lantern": "Lantern",
+  "item.torchesbt.wall_unlit_lantern": "Lantern",
+  "block.torchesbt.unlit_lantern": "Lantern",
+  "block.torchesbt.wall_unlit_lantern": "Lantern",
+
+
+  "config.torchesbt.category.burnTimes": "Burn Times",
+
+  "config.torchesbt.torchBurnTime": "Torch Burn Time",
+  "config.torchesbt.torchBurnTime.tooltip": "Burn time for torches in ticks (0 to disable).",
+
+  "config.torchesbt.lanternBurnTime": "Lantern Burn Time",
+  "config.torchesbt.lanternBurnTime.tooltip": "Burn time for lanterns in ticks (0 to disable).",
+
+  "config.torchesbt.torchBreakChance": "Torch Break Chance",
+  "config.torchesbt.torchBreakChance.tooltip": "Chances of torches being broken when they reach 0 burntime",
+
+  "config.torchesbt.campfireBurnTime": "Campfire Burn Time",
+  "config.torchesbt.campfireBurnTime.tooltip": "Burn time for campfires in ticks (0 to disable).",
+
+  "torchesbt.burn_time": "Burn Time: %d/%d ticks"
+}

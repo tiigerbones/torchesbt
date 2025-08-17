@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "torchesbt",
+	"version": "${version}",
+	"name": "Realistic Torches BT",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"tiigerbones!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/torchesbt/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.enchantedwisp.torchesbt.RealisticTorchesBT"
+		],
+		"client": [
+			"com.enchantedwisp.torchesbt.client.RealisticTorchesBTClient"
+		],
+		"modmenu": [
+			"com.enchantedwisp.torchesbt.config.RTorchesModMenu"
+		]
+	},
+	"mixins": [
+		"torchesbt.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.17.2",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*",
+		"cloth-config": ">=11.1.136"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
