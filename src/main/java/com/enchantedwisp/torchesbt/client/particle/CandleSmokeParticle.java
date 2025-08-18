@@ -6,30 +6,51 @@ import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
 
 public class CandleSmokeParticle extends SpriteBillboardParticle {
+    private final SpriteProvider spriteProvider;
+
     protected CandleSmokeParticle(ClientWorld world, double x, double y, double z,
                                   double vx, double vy, double vz, SpriteProvider spriteProvider) {
         super(world, x, y, z, vx, vy, vz);
+        this.spriteProvider = spriteProvider;
 
-        // Custom tweaks for sparse/dying smoke
-        this.scale = 0.03f; // smaller than vanilla smoke
-        this.maxAge = 30 + this.random.nextInt(20);
+        // Candle smoke is very thin & small
+        this.scale = 0.03f + this.random.nextFloat() * 0.01f;
+
+        // Longer lifespan so it drifts higher
+        this.maxAge = 80 + this.random.nextInt(40);
+
         this.gravityStrength = 0.0f;
-        this.velocityX *= 0.02;
-        this.velocityY *= 0.02;
-        this.velocityZ *= 0.02;
-        // Randomize grayscale color between dark gray (0.1) and light gray (0.4)
-        float grayValue = 0.3F + this.random.nextFloat() * 0.4F;
+
+        // Gentle motion
+        this.velocityX *= 0.01;
+        this.velocityY = 0.005 + this.random.nextFloat() * 0.01; // much slower upward start
+        this.velocityZ *= 0.01;
+
+        // Random grayscale, slightly lighter for candle smoke
+        float grayValue = 0.3F + this.random.nextFloat() * 0.3F;
         this.setColor(grayValue, grayValue, grayValue);
 
+        this.alpha = 0.9f;
 
-        this.alpha = 0.8f;
-        this.setSpriteForAge(spriteProvider);
+        this.age = this.random.nextInt(this.maxAge / 2);
+        this.setSpriteForAge(this.spriteProvider);
     }
 
     @Override
     public void tick() {
         super.tick();
-        this.alpha = ((float) this.maxAge - this.age) / (float) this.maxAge; // fade over lifetime
+
+        // Fade out smoothly
+        this.alpha = ((float) this.maxAge - this.age) / (float) this.maxAge;
+
+        // Slowly shrink
+        this.scale *= 0.99f;
+
+        // Add a tiny upward acceleration so it drifts higher
+        this.velocityY += 0.001;
+
+        // Keep sprite animation in sync
+        this.setSpriteForAge(this.spriteProvider);
     }
 
     @Override

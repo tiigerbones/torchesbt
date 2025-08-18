@@ -5,40 +5,49 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particle.DefaultParticleType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
-
 public class TorchSmokeParticle extends SpriteBillboardParticle {
+    private final SpriteProvider spriteProvider;
 
     protected TorchSmokeParticle(ClientWorld world, double x, double y, double z,
                                  double vx, double vy, double vz, SpriteProvider spriteProvider) {
         super(world, x, y, z, vx, vy, vz);
+        this.spriteProvider = spriteProvider;
 
-        // Occasional skip: 1 in 2 chance to vanish immediately
-        if (world.random.nextInt(2) == 0) {
-            this.markDead();
-            return;
-        }
-
-        // Custom tweaks for sparse/dying smoke
-        this.scale = 0.05f;
-        this.maxAge = 30 + this.random.nextInt(20); // dies out quicker
+        // Random size
+        this.scale = 0.08f + this.random.nextFloat() * 0.05f;
+        this.maxAge = 40 + this.random.nextInt(20);
         this.gravityStrength = 0.0f;
+
+        // Give upward drift
         this.velocityX *= 0.02;
-        this.velocityY *= 0.02;
+        this.velocityY = 0.02 + this.random.nextFloat() * 0.02;
         this.velocityZ *= 0.02;
 
-        // Randomize grayscale color between dark gray (0.1) and light gray (0.4)
-        float grayValue = 0.1F + this.random.nextFloat() * 0.3F;
+        // Random grayscale
+        float grayValue = 0.2F + this.random.nextFloat() * 0.3F;
         this.setColor(grayValue, grayValue, grayValue);
 
-        this.alpha = 0.8f;
-        this.setSpriteForAge(spriteProvider);
+        this.alpha = 0.9f;
+
+        // 🔑 Randomize starting age (so not all particles start at frame 0)
+        this.age = this.random.nextInt(this.maxAge / 2);
+
+        // 🔑 Make sure we assign an initial sprite immediately
+        this.setSpriteForAge(this.spriteProvider);
     }
 
     @Override
     public void tick() {
         super.tick();
-        this.alpha = ((float) this.maxAge - this.age) / (float) this.maxAge; // fade over lifetime
+
+        // Fade out over time
+        this.alpha = ((float) this.maxAge - this.age) / (float) this.maxAge;
+
+        // Shrink slightly
+        this.scale *= 0.98f;
+
+        // 🔑 Update sprite linearly by age
+        this.setSpriteForAge(this.spriteProvider);
     }
 
     @Override

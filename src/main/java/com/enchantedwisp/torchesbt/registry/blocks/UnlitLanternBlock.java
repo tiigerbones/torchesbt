@@ -5,16 +5,16 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LanternBlock;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
 public class UnlitLanternBlock extends LanternBlock {
-        public UnlitLanternBlock() {
-            super(Settings.copy(Blocks.LANTERN)
-                    .luminance(state -> 0));
-        }
+    public UnlitLanternBlock() {
+        super(Settings.copy(Blocks.LANTERN)
+                .luminance(state -> 0));
+    }
+
     @Override
     public String getTranslationKey() {
         return "block.torchesbt.unlit_lantern";

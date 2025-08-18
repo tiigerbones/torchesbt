@@ -1,13 +1,15 @@
 {
   "item.torchesbt.unlit_torch": "Torch",
-  "item.torchesbt.wall_unlit_torch": "Torch",
+  "item.torchesbt.unlit_wall_torch": "Torch",
   "block.torchesbt.unlit_torch": "Torch",
-  "block.torchesbt.wall_unlit_torch": "Torch",
+  "block.torchesbt.unlit_wall_torch": "Torch",
+
+  "block.torchesbt.unlit_campfire": "Campfire",
 
   "item.torchesbt.unlit_lantern": "Lantern",
-  "item.torchesbt.wall_unlit_lantern": "Lantern",
+  "item.torchesbt.unlit_wall_lantern": "Lantern",
   "block.torchesbt.unlit_lantern": "Lantern",
-  "block.torchesbt.wall_unlit_lantern": "Lantern",
+  "block.torchesbt.unlit_wall_lantern": "Lantern",
 
 
   "config.torchesbt.category.burnTimes": "Burn Times",

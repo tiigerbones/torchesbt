@@ -18,6 +18,6 @@ public class RealisticTorchesBTClient implements ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlock(Block.getBlockFromItem(RegistryHandler.UNLIT_TORCH), RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(RegistryHandler.UNLIT_WALL_TORCH_BLOCK, RenderLayer.getCutout());
         BlockRenderLayerMap.INSTANCE.putBlock(Block.getBlockFromItem(RegistryHandler.UNLIT_LANTERN), RenderLayer.getCutout());
-        BlockRenderLayerMap.INSTANCE.putBlock(RegistryHandler.UNLIT_LANTERN_BLOCK,RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(RegistryHandler.UNLIT_LANTERN_BLOCK, RenderLayer.getCutout());
     }
 }
