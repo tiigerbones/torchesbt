@@ -32,6 +32,8 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    modImplementation  "maven.modrinth:jade:11.13.1+fabric"
+
 	modApi("dev.emi:trinkets:${project.trinkets_version}")
 
 	modApi "com.terraformersmc:modmenu:7.2.2"
@@ -42,7 +44,6 @@ dependencies {
 
 	// For testing
 	modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${project.lambdynlights_version}")
-	modLocalRuntime "maven.modrinth:jade:11.13.1+fabric"
 	modLocalRuntime "maven.modrinth:trinkets:${project.trinkets_version}"
 	modLocalRuntime "maven.modrinth:emi:1.1.22+1.20.1+fabric"
 }
