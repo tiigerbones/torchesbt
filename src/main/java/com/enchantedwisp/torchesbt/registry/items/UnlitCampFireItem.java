@@ -2,24 +2,52 @@ package com.enchantedwisp.torchesbt.registry.items;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
+import net.minecraft.block.CampfireBlock;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-public class UnlitCampFireItem extends BlockItem {
+public class UnlitCampFireItem extends Item {
     public UnlitCampFireItem(Settings settings) {
-        super(Blocks.CAMPFIRE, settings); // ties it to vanilla campfire
+        super(settings);
     }
 
     @Override
-    protected BlockState getPlacementState(ItemPlacementContext context) {
-        // Get the normal placement state for a campfire
-        BlockState state = super.getPlacementState(context);
-        if (state != null) {
-            // Force it to be unlit/extinguished
-            state = state
-                    .with(net.minecraft.block.CampfireBlock.LIT, false)
-                    .with(net.minecraft.block.CampfireBlock.SIGNAL_FIRE, false);
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        World world = context.getWorld();
+        PlayerEntity player = context.getPlayer();
+
+        ItemPlacementContext placementContext = new ItemPlacementContext(context);
+
+        // Get the default placement state for a vanilla campfire
+        BlockState state = Blocks.CAMPFIRE.getPlacementState(placementContext);
+        if (state == null) {
+            return ActionResult.FAIL;
         }
-        return state;
+        // Force it to be unlit
+        state = state
+                .with(CampfireBlock.LIT, false)
+                .with(CampfireBlock.SIGNAL_FIRE, false);
+
+        BlockPos placePos = placementContext.getBlockPos();
+
+        // Try placing
+        if (!world.canSetBlock(placePos)) {
+            return ActionResult.FAIL;
+        }
+
+        if (!world.isClient) {
+            world.setBlockState(placePos, state, 3);
+
+            if (player != null && !player.isCreative()) {
+                context.getStack().decrement(1);
+            }
+        }
+
+        return ActionResult.success(world.isClient);
     }
 }
