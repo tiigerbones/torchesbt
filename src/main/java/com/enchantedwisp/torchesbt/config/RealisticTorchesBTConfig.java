@@ -8,37 +8,59 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "torchesbt")
 public class RealisticTorchesBTConfig implements ConfigData {
-    @Comment("Burn time for torches in seconds. Default: 300 (5 minutes)")
+    @Comment("Burn time for torches in seconds. Default: 1100 (18.3 minutes)")
     @ConfigEntry.Gui.PrefixText
-    @ConfigEntry.BoundedDiscrete(min = 60, max = 8800)
+    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
     public int torchBurnTime = 1100;
 
-    @Comment("Burn time for lanterns in seconds. Default: 600 (10 minutes)")
-    @ConfigEntry.BoundedDiscrete(min = 60, max = 8800)
+    @Comment("Burn time for lanterns in seconds. Default: 1100 (18.3 minutes)")
+    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
     public int lanternBurnTime = 1100;
 
-    @Comment("Chance (in percent) for a torch to break when its burn time reaches 0 (0-100). Default: 50")
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 100)
-    public int torchBreakChance = 50;
+    @Comment("Burn time for campfires in seconds. Default: 1100 (18.3 minutes)")
+    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
+    public int campfireBurnTime = 1100;
+
+    @Comment("If true, rain affects burnout (torches/campfires/lanterns: faster). Default: true")
+    @ConfigEntry.Gui.PrefixText
+    public boolean enableRainExtinguish = true;
+
+    @Comment("Burn time multiplier for torches in rain. Default: 2.0 (2x faster)")
+    public double rainTorchMultiplier = 2.0;
+
+    @Comment("Burn time multiplier for campfires in rain. Default: 1.5 (1.5x faster)")
+    public double rainCampfireMultiplier = 1.5;
+
+    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (0.8x faster)")
+    public double rainLanternMultiplier = 0.8;
 
     @Override
     public void validatePostLoad() {
-        // Validate torch burn time
+        // Clamp burn times
         if (torchBurnTime < 60 || torchBurnTime > 3600) {
             RealisticTorchesBT.LOGGER.warn("Correcting torchBurnTime: {} to {}. Must be between 60 and 3600.", torchBurnTime, Math.max(60, Math.min(3600, torchBurnTime)));
             torchBurnTime = Math.max(60, Math.min(3600, torchBurnTime));
         }
-
-        // Validate lantern burn time
         if (lanternBurnTime < 60 || lanternBurnTime > 3600) {
             RealisticTorchesBT.LOGGER.warn("Correcting lanternBurnTime: {} to {}. Must be between 60 and 3600.", lanternBurnTime, Math.max(60, Math.min(3600, lanternBurnTime)));
             lanternBurnTime = Math.max(60, Math.min(3600, lanternBurnTime));
         }
-
-        // Validate torch break chance
-        if (torchBreakChance < 0 || torchBreakChance > 100) {
-            RealisticTorchesBT.LOGGER.warn("Correcting torchBreakChance: {} to {}. Must be between 0 and 100.", torchBreakChance, Math.max(0, Math.min(100, torchBreakChance)));
-            torchBreakChance = Math.max(0, Math.min(100, torchBreakChance));
+        if (campfireBurnTime < 60 || campfireBurnTime > 3600) {
+            RealisticTorchesBT.LOGGER.warn("Correcting campfireBurnTime: {} to {}. Must be between 60 and 3600.", campfireBurnTime, Math.max(60, Math.min(3600, campfireBurnTime)));
+            campfireBurnTime = Math.max(60, Math.min(3600, campfireBurnTime));
+        }
+        // Clamp multipliers
+        if (rainTorchMultiplier < 1.0 || rainTorchMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting rainTorchMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainTorchMultiplier, Math.max(1.0, Math.min(10.0, rainTorchMultiplier)));
+            rainTorchMultiplier = Math.max(1.0, Math.min(10.0, rainTorchMultiplier));
+        }
+        if (rainCampfireMultiplier < 1.0 || rainCampfireMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting rainCampfireMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainCampfireMultiplier, Math.max(1.0, Math.min(10.0, rainCampfireMultiplier)));
+            rainCampfireMultiplier = Math.max(1.0, Math.min(10.0, rainCampfireMultiplier));
+        }
+        if (rainLanternMultiplier < 1.0 || rainLanternMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting rainLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainLanternMultiplier, Math.max(1.0, Math.min(10.0, rainLanternMultiplier)));
+            rainLanternMultiplier = Math.max(1.0, Math.min(10.0, rainLanternMultiplier));
         }
     }
 }
