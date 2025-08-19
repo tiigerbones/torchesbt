@@ -1,0 +1,7 @@
+{
+  "items": [
+    "minecraft:flint_and_steel",
+    "#torchesbt:igniters"
+  ],
+  "ignite_amount": 20
+}
