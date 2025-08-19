@@ -4,7 +4,7 @@
   "block.torchesbt.unlit_torch": "Torch",
   "block.torchesbt.unlit_wall_torch": "Torch",
 
-  "block.torchesbt.unlit_campfire": "Campfire",
+  "item.torchesbt.unlit_campfire": "Campfire",
 
   "item.torchesbt.unlit_lantern": "Lantern",
   "item.torchesbt.unlit_wall_lantern": "Lantern",
