@@ -26,7 +26,7 @@ public class RegistryHandler {
 
     public static void register() {
         registerItemGroups();
-        RealisticTorchesBT.LOGGER.info("Registering blocks, items, and block entities for The Murk");
+        RealisticTorchesBT.LOGGER.info("Registering blocks, items, and block entities for Realistic torches BT");
 
         Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "unlit_torch"), UNLIT_TORCH_BLOCK);
         Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "unlit_wall_torch"), UNLIT_WALL_TORCH_BLOCK);

@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
+import com.enchantedwisp.torchesbt.util.JsonLoader;
 import com.enchantedwisp.torchesbt.util.ReignitionHandler;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
@@ -51,5 +52,8 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Ignite
         ReignitionHandler.register();
+
+        // Json
+        JsonLoader.register();
     }
 }
