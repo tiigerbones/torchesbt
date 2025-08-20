@@ -36,19 +36,6 @@ public class RealisticTorchesBTConfig implements ConfigData {
 
     @Override
     public void validatePostLoad() {
-        // Clamp burn times
-        if (torchBurnTime < 60 || torchBurnTime > 3600) {
-            RealisticTorchesBT.LOGGER.warn("Correcting torchBurnTime: {} to {}. Must be between 60 and 3600.", torchBurnTime, Math.max(60, Math.min(3600, torchBurnTime)));
-            torchBurnTime = Math.max(60, Math.min(3600, torchBurnTime));
-        }
-        if (lanternBurnTime < 60 || lanternBurnTime > 3600) {
-            RealisticTorchesBT.LOGGER.warn("Correcting lanternBurnTime: {} to {}. Must be between 60 and 3600.", lanternBurnTime, Math.max(60, Math.min(3600, lanternBurnTime)));
-            lanternBurnTime = Math.max(60, Math.min(3600, lanternBurnTime));
-        }
-        if (campfireBurnTime < 60 || campfireBurnTime > 3600) {
-            RealisticTorchesBT.LOGGER.warn("Correcting campfireBurnTime: {} to {}. Must be between 60 and 3600.", campfireBurnTime, Math.max(60, Math.min(3600, campfireBurnTime)));
-            campfireBurnTime = Math.max(60, Math.min(3600, campfireBurnTime));
-        }
         // Clamp multipliers
         if (rainTorchMultiplier < 1.0 || rainTorchMultiplier > 10.0) {
             RealisticTorchesBT.LOGGER.warn("Correcting rainTorchMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainTorchMultiplier, Math.max(1.0, Math.min(10.0, rainTorchMultiplier)));
