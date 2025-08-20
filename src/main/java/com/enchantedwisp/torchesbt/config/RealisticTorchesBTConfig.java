@@ -8,18 +8,18 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "torchesbt")
 public class RealisticTorchesBTConfig implements ConfigData {
-    @Comment("Burn time for torches in seconds. Default: 1100 (18.3 minutes)")
+    @Comment("Burn time for torches. Default: 40")
     @ConfigEntry.Gui.PrefixText
-    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
-    public int torchBurnTime = 1100;
+    @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
+    public int torchBurnTime = 40;
 
-    @Comment("Burn time for lanterns in seconds. Default: 1100 (18.3 minutes)")
-    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
-    public int lanternBurnTime = 1100;
+    @Comment("Burn time for lanterns. Default: 60")
+    @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
+    public int lanternBurnTime = 60;
 
-    @Comment("Burn time for campfires in seconds. Default: 1100 (18.3 minutes)")
-    @ConfigEntry.BoundedDiscrete(min = 60, max = 3600)
-    public int campfireBurnTime = 1100;
+    @Comment("Burn time for campfires. Default: 100")
+    @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
+    public int campfireBurnTime = 100;
 
     @Comment("If true, rain affects burnout (torches/campfires/lanterns: faster). Default: true")
     @ConfigEntry.Gui.PrefixText

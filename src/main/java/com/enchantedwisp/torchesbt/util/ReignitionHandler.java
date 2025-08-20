@@ -1,16 +1,18 @@
 package com.enchantedwisp.torchesbt.util;
 
+import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
+import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitWallTorchBlock;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.CampfireBlock;
-import net.minecraft.block.LanternBlock;
-import net.minecraft.block.WallTorchBlock;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -19,11 +21,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 public class ReignitionHandler {
-    private static final Logger LOGGER = LogManager.getLogger("torchesbt");
+    private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
 
     public static void register() {
         // -------------------------------
@@ -41,82 +42,99 @@ public class ReignitionHandler {
             // IGNITERS
             // -------------------------------
             if (JsonLoader.IGNITERS.containsKey(itemId)) {
-
-                // --- Torch blocks (igniters only) ---
+                // --- Torch blocks ---
                 if (state.getBlock() == RegistryHandler.UNLIT_TORCH_BLOCK || state.getBlock() == RegistryHandler.UNLIT_WALL_TORCH_BLOCK) {
                     BlockState newState = (state.getBlock() == RegistryHandler.UNLIT_TORCH_BLOCK ? Blocks.TORCH : Blocks.WALL_TORCH).getDefaultState();
                     if (state.getBlock() == RegistryHandler.UNLIT_WALL_TORCH_BLOCK) {
                         newState = newState.with(WallTorchBlock.FACING, state.get(UnlitWallTorchBlock.FACING));
                     }
-                    if (world.getBlockEntity(pos) != null) world.removeBlockEntity(pos);
                     world.setBlockState(pos, newState);
-                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    BlockEntity entity = world.getBlockEntity(pos);
+                    if (entity instanceof TorchBlockEntity torch) {
+                        torch.setRemainingBurnTime(torch.getMaxBurnTime());
+                    }
                     consumeIgniter(stack, player, hand);
-                    return ActionResult.CONSUME;
+                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
+                    LOGGER.debug("Reignited torch at {} by {}", pos, player.getName().getString());
+                    return ActionResult.SUCCESS;
                 }
 
-                // --- Lantern blocks ---
+                // --- Lantern block ---
                 if (state.getBlock() == RegistryHandler.UNLIT_LANTERN_BLOCK) {
                     BlockState newState = Blocks.LANTERN.getDefaultState()
                             .with(LanternBlock.HANGING, state.get(LanternBlock.HANGING));
-                    if (world.getBlockEntity(pos) != null) world.removeBlockEntity(pos);
                     world.setBlockState(pos, newState);
-                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    BlockEntity entity = world.getBlockEntity(pos);
+                    if (entity instanceof LanternBlockEntity lantern) {
+                        lantern.setRemainingBurnTime(lantern.getMaxBurnTime());
+                    }
                     consumeIgniter(stack, player, hand);
-                    return ActionResult.CONSUME;
+                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
+                    LOGGER.debug("Reignited lantern at {} by {}", pos, player.getName().getString());
+                    return ActionResult.SUCCESS;
                 }
 
-                // --- Campfires (unlit only) ---
+                // --- Campfire block ---
                 if (state.getBlock() == Blocks.CAMPFIRE && !state.get(CampfireBlock.LIT)) {
                     BlockState newState = state.with(CampfireBlock.LIT, true);
-                    if (world.getBlockEntity(pos) != null) world.removeBlockEntity(pos);
                     world.setBlockState(pos, newState);
-                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                    BlockEntity entity = world.getBlockEntity(pos);
+                    if (entity instanceof CampfireBlockEntity campfire) {
+                        BurnableLightUtil.setBurnTimeOnPlacement(world, pos, campfire, stack, ConfigCache.getCampfireBurnTime());
+                    }
                     consumeIgniter(stack, player, hand);
-                    return ActionResult.CONSUME;
+                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
+                    LOGGER.debug("Reignited campfire at {} by {}", pos, player.getName().getString());
+                    return ActionResult.SUCCESS;
                 }
             }
 
             // -------------------------------
-            // FUELS (consume on right-click, sizzle sound)
+            // FUELS
             // -------------------------------
-
-            // Lanterns
-            if (state.getBlock() == Blocks.LANTERN && JsonLoader.LANTERN_FUELS.containsKey(itemId)) {
-                int extraTime = JsonLoader.LANTERN_FUELS.get(itemId);
-                consumeFuel(stack, player, hand); // consume immediately
-                world.playSound(null, pos, SoundEvents.BLOCK_LANTERN_HIT, SoundCategory.BLOCKS, 1.0F, 1.0F); // sizzle sound
-                LOGGER.debug("Added {} ticks of fuel to lantern at {} using {}", extraTime, pos, itemId);
-                return ActionResult.SUCCESS;
+            if (JsonLoader.CAMPFIRE_FUELS.containsKey(itemId) && state.getBlock() == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT)) {
+                long addTime = JsonLoader.CAMPFIRE_FUELS.get(itemId) * 20L; // JSON in seconds
+                BlockEntity entity = world.getBlockEntity(pos);
+                if (entity instanceof CampfireBlockEntity campfire) {
+                    long current = BurnTimeManager.getCurrentBurnTime(campfire);
+                    BurnTimeManager.setCurrentBurnTime(campfire, current + addTime);
+                    consumeFuel(stack, player, hand);
+                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
+                    LOGGER.debug("Added {} ticks to campfire at {} by {}", addTime, pos, player.getName().getString());
+                    return ActionResult.SUCCESS;
+                }
             }
 
-            // Lit campfires
-            if (state.getBlock() == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT) && JsonLoader.CAMPFIRE_FUELS.containsKey(itemId)) {
-                int extraTime = JsonLoader.CAMPFIRE_FUELS.get(itemId);
-                consumeFuel(stack, player, hand); // consume immediately
-                world.playSound(null, pos, SoundEvents.BLOCK_LAVA_EXTINGUISH, SoundCategory.BLOCKS, 1.0F, 1.0F); // sizzle sound
-                LOGGER.debug("Added {} ticks of fuel to campfire at {} using {}", extraTime, pos, itemId);
-                return ActionResult.SUCCESS;
+            if (JsonLoader.LANTERN_FUELS.containsKey(itemId) && state.getBlock() == Blocks.LANTERN) {
+                long addTime = JsonLoader.LANTERN_FUELS.get(itemId) * 20L; // JSON in seconds
+                BlockEntity entity = world.getBlockEntity(pos);
+                if (entity instanceof LanternBlockEntity lantern) {
+                    long current = lantern.getRemainingBurnTime();
+                    lantern.setRemainingBurnTime(current + addTime);
+                    consumeFuel(stack, player, hand);
+                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
+                    LOGGER.debug("Added {} ticks to lantern at {} by {}", addTime, pos, player.getName().getString());
+                    return ActionResult.SUCCESS;
+                }
             }
 
             return ActionResult.PASS;
         });
 
         // -------------------------------
-        // ITEM REIGNITION (inventory items)
+        // ITEM REIGNITION
         // -------------------------------
         UseItemCallback.EVENT.register((player, world, hand) -> {
             if (world.isClient) return TypedActionResult.pass(player.getStackInHand(hand));
 
             ItemStack stack = player.getStackInHand(hand);
             ItemStack offHandStack = player.getStackInHand(hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
-
-            Identifier stackId = Registries.ITEM.getId(stack.getItem());
             Identifier offId = Registries.ITEM.getId(offHandStack.getItem());
 
             // Torch item reignition
             if (stack.getItem() == RegistryHandler.UNLIT_TORCH && JsonLoader.IGNITERS.containsKey(offId)) {
-                ItemStack newStack = new ItemStack(Blocks.TORCH.asItem(), stack.getCount());
+                ItemStack newStack = new ItemStack(Items.TORCH, stack.getCount());
+                BurnTimeManager.setCurrentBurnTime(newStack, BurnTimeManager.getMaxBurnTime(newStack));
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
@@ -126,7 +144,8 @@ public class ReignitionHandler {
 
             // Lantern item reignition
             if (stack.getItem() == RegistryHandler.UNLIT_LANTERN && JsonLoader.IGNITERS.containsKey(offId)) {
-                ItemStack newStack = new ItemStack(Blocks.LANTERN.asItem(), stack.getCount());
+                ItemStack newStack = new ItemStack(Items.LANTERN, stack.getCount());
+                BurnTimeManager.setCurrentBurnTime(newStack, BurnTimeManager.getMaxBurnTime(newStack));
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);

@@ -1,10 +1,10 @@
 package com.enchantedwisp.torchesbt;
 
+import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
-import com.enchantedwisp.torchesbt.util.JsonLoader;
-import com.enchantedwisp.torchesbt.util.ReignitionHandler;
+import com.enchantedwisp.torchesbt.util.*;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
@@ -53,7 +53,16 @@ public class RealisticTorchesBT implements ModInitializer {
         // Ignite
         ReignitionHandler.register();
 
+        BurnTimeManager.register();
+
+        ModBlockEntities.register();
+
         // Json
         JsonLoader.register();
+
+        // Initialize dynamic light support check
+        DynamicLightManager.init();
+
+        ConfigCache.initialize();
     }
 }
