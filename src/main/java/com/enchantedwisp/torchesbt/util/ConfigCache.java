@@ -7,13 +7,13 @@ import org.slf4j.Logger;
 
 public class ConfigCache {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
-    private static long torchBurnTime = 0; // ticks
-    private static long lanternBurnTime = 0;
-    private static long campfireBurnTime = 0;
-    private static boolean enableRainExtinguish = true;
-    private static double rainTorchMultiplier = 2.0;
-    private static double rainCampfireMultiplier = 1.5;
-    private static double rainLanternMultiplier = 0.8;
+    private static long torchBurnTime; // ticks
+    private static long lanternBurnTime;
+    private static long campfireBurnTime;
+    private static boolean enableRainExtinguish;
+    private static double rainTorchMultiplier;
+    private static double rainCampfireMultiplier;
+    private static double rainLanternMultiplier;
 
     public static void initialize() {
         RealisticTorchesBTConfig config = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class).getConfig();
