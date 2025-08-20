@@ -1,10 +1,11 @@
-package com.enchantedwisp.torchesbt.util;
+package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitWallTorchBlock;
+import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.block.*;

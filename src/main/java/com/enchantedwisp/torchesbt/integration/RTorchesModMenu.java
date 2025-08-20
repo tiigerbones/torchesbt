@@ -1,5 +1,6 @@
-package com.enchantedwisp.torchesbt.config;
+package com.enchantedwisp.torchesbt.integration;
 
+import com.enchantedwisp.torchesbt.config.RTorchesConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 

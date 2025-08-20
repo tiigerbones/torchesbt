@@ -1,6 +1,6 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.util.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import org.spongepowered.asm.mixin.Mixin;

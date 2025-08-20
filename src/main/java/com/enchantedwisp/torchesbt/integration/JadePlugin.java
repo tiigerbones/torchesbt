@@ -1,6 +1,8 @@
-package com.enchantedwisp.torchesbt.util;
+package com.enchantedwisp.torchesbt.integration;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.Blocks;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -33,11 +35,11 @@ public class JadePlugin implements IWailaPlugin {
 
             private long getMaxBurnTime(net.minecraft.block.Block block) {
                 if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
-                    return RealisticTorchesBT.getConfig().torchBurnTime * 20L;
+                    return ConfigCache.getTorchBurnTime();
                 } else if (block == Blocks.LANTERN) {
-                    return RealisticTorchesBT.getConfig().lanternBurnTime * 20L;
+                    return ConfigCache.getLanternBurnTime();
                 } else if (block == Blocks.CAMPFIRE) {
-                    return RealisticTorchesBT.getConfig().campfireBurnTime * 20L;
+                    return ConfigCache.getCampfireBurnTime();
                 }
                 return 0;
             }

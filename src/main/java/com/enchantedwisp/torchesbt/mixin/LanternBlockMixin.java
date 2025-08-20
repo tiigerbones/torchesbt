@@ -2,7 +2,7 @@ package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
-import com.enchantedwisp.torchesbt.util.BurnableLightUtil;
+import com.enchantedwisp.torchesbt.burn.BurnableLightUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;

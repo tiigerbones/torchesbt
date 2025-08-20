@@ -1,7 +1,10 @@
 package com.enchantedwisp.torchesbt;
 
 import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
+import com.enchantedwisp.torchesbt.integration.DynamicLightManager;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.util.*;

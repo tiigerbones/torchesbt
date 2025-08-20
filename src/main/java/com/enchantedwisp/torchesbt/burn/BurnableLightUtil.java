@@ -1,9 +1,8 @@
-package com.enchantedwisp.torchesbt.util;
+package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
-import net.minecraft.block.WallTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.item.ItemStack;

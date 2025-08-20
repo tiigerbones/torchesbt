@@ -1,14 +1,11 @@
 package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
-import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
-import com.enchantedwisp.torchesbt.util.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;

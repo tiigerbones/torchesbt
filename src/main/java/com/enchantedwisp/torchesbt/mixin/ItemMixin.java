@@ -1,6 +1,6 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.util.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;

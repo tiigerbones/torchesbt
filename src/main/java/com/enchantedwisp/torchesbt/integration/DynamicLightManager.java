@@ -1,4 +1,4 @@
-package com.enchantedwisp.torchesbt.util;
+package com.enchantedwisp.torchesbt.integration;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import org.slf4j.Logger;

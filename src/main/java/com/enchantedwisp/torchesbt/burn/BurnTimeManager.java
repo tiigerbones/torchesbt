@@ -1,9 +1,10 @@
-package com.enchantedwisp.torchesbt.util;
+package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -19,7 +20,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 
-import static com.enchantedwisp.torchesbt.util.DynamicLightManager.isDynamicLightingModLoaded;
+import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightingModLoaded;
 
 public class BurnTimeManager {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
