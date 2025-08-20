@@ -43,7 +43,7 @@ public class BurnTimeManager {
 
     // --- Player-held items ---
     private static void processPlayerBurnTimes(PlayerEntity player) {
-        if (!isDynamicLightingModLoaded()) return; // Only run if dynamic lighting is present
+        if (!isDynamicLightingModLoaded()) return;
 
         World world = player.getWorld();
         if (world.isClient) return;
@@ -52,38 +52,30 @@ public class BurnTimeManager {
             ItemStack stack = player.getStackInHand(hand);
             if (!isBurnableItem(stack)) continue;
 
-            NbtCompound stackNbt = stack.getOrCreateNbt();
-
-            // --- If the item already has burn time, just tick normally ---
-            if (stackNbt.contains(BURN_TIME_KEY)) {
-                processBurnableItem(stack, world, player, hand);
-                continue;
-            }
-
-            // --- Item has no burn time: split stack if necessary ---
-            if (stack.getCount() > 1) {
-                ItemStack burningItem = stack.copyWithCount(1);
-                initializeBurnTime(burningItem); // Initialize only one item
-                stack.decrement(1); // Reduce original stack by one
-                player.setStackInHand(hand, burningItem);
-
-                // Try to put the remaining stack back into inventory
-                if (!player.getInventory().insertStack(stack)) {
-                    player.dropItem(stack, false); // Drop on ground if inventory full
-                    LOGGER.debug("Dropped remaining stack for player {}: item={}, count={}",
-                            player.getName().getString(), stack.getItem(), stack.getCount());
-                } else {
-                    LOGGER.debug("Moved remaining stack to inventory for player {}: item={}, count={}",
-                            player.getName().getString(), stack.getItem(), stack.getCount());
-                }
+            if (stack.hasNbt() && stack.getNbt().contains(BURN_TIME_KEY)) {
+                processBurnableItem(stack, world, player, hand, player.getBlockPos());
             } else {
-                // Only one item: just initialize burn time
-                initializeBurnTime(stack);
-                player.setStackInHand(hand, stack);
+                splitAndInitializeStack(player, hand, stack);
             }
         }
     }
 
+    // Split stack to initialize one item with burn-time
+    private static void splitAndInitializeStack(PlayerEntity player, Hand hand, ItemStack stack) {
+        if (stack.getCount() > 1) {
+            ItemStack burningItem = stack.copyWithCount(1);
+            initializeBurnTime(burningItem);
+            stack.decrement(1);
+            player.setStackInHand(hand, burningItem);
+
+            if (!player.getInventory().insertStack(stack)) {
+                player.dropItem(stack, false);
+            }
+        } else {
+            initializeBurnTime(stack);
+            player.setStackInHand(hand, stack);
+        }
+    }
 
     // --- Nearby blocks + dropped items ---
     private static void processNearbyBurnables(PlayerEntity player) {
@@ -108,21 +100,42 @@ public class BurnTimeManager {
             }
         }
 
+        // --- Process dropped items ---
         if (isDynamicLightingModLoaded()) {
             for (ItemEntity itemEntity : world.getEntitiesByClass(ItemEntity.class, box,
                     e -> isBurnableItem(e.getStack()))) {
 
                 ItemStack stack = itemEntity.getStack();
-                long before = getCurrentBurnTime(stack);
 
-                processBurnableItem(stack, world, null, null);
+                if (stack.hasNbt() && stack.getNbt().contains(BURN_TIME_KEY)) {
+                    // Tick the burnable item
+                    processBurnableItem(stack, world, null, null, itemEntity.getBlockPos());
 
-                if (before > 0 && getCurrentBurnTime(stack) == 0) {
-                    ItemStack newStack = (stack.getItem() == Items.TORCH ? RegistryHandler.UNLIT_TORCH : RegistryHandler.UNLIT_LANTERN).getDefaultStack();
-                    newStack.setCount(stack.getCount());
-                    itemEntity.setStack(newStack);
+                    // Convert to unlit if burn time reached 0
+                    if (getCurrentBurnTime(stack) <= 0) {
+                        ItemStack newStack = (stack.getItem() == Items.TORCH ? RegistryHandler.UNLIT_TORCH : RegistryHandler.UNLIT_LANTERN).getDefaultStack();
+                        newStack.setCount(stack.getCount());
+                        itemEntity.setStack(newStack);
+                    } else if (getCurrentBurnTime(stack) != stack.getNbt().getLong(BURN_TIME_KEY)) {
+                        itemEntity.setStack(stack);
+                    }
                 } else {
-                    itemEntity.setStack(stack);
+                    // Stack has no burn-time yet, split to initialize
+                    if (stack.getCount() > 1) {
+                        ItemStack burningItem = stack.copyWithCount(1);
+                        initializeBurnTime(burningItem);
+                        stack.decrement(1);
+
+                        itemEntity.setStack(burningItem);
+
+                        // Drop remaining stack as a new entity
+                        ItemEntity remainder = new ItemEntity(world, itemEntity.getX(), itemEntity.getY(), itemEntity.getZ(), stack);
+                        world.spawnEntity(remainder);
+                    } else {
+                        // Only one item in stack: initialize burn time
+                        initializeBurnTime(stack);
+                        itemEntity.setStack(stack);
+                    }
                 }
             }
         }
@@ -134,18 +147,28 @@ public class BurnTimeManager {
     }
 
     // --- Item ticking ---
-    private static void processBurnableItem(ItemStack stack, World world, PlayerEntity player, Hand hand) {
+    private static void processBurnableItem(ItemStack stack, World world, PlayerEntity player, Hand hand, BlockPos pos) {
         if (!isBurnableItem(stack)) return;
 
         long max = getMaxBurnTime(stack);
         long current = getCurrentBurnTime(stack);
 
-        // Clamp if config decreased
         if (current > max) current = max;
 
         if (current > 0) {
-            current--;
-            stack.getOrCreateNbt().putLong(BURN_TIME_KEY, current);
+            long decrement = 1;
+
+            BlockPos checkPos = pos != null ? pos : (player != null ? player.getBlockPos() : null);
+
+            if (checkPos != null && isActuallyRainingAt(world, checkPos)) {
+                if (stack.getItem() == Items.TORCH) decrement = (long) Math.ceil(ConfigCache.getRainTorchMultiplier());
+                if (stack.getItem() == Items.LANTERN) decrement = (long) Math.ceil(ConfigCache.getRainLanternMultiplier());
+            }
+
+            long newBurn = Math.max(current - decrement, 0);
+            if (newBurn != current) {
+                stack.getOrCreateNbt().putLong(BURN_TIME_KEY, newBurn);
+            }
         }
 
         if (current <= 0) {
@@ -165,12 +188,12 @@ public class BurnTimeManager {
 
         if (current > max) torch.setRemainingBurnTime(max);
 
-        if (ConfigCache.isRainExtinguishEnabled() && world.isRaining() && world.isSkyVisible(pos)) {
-            if (current > 0) torch.setRemainingBurnTime(current - (long) Math.ceil(ConfigCache.getRainTorchMultiplier()));
-            if (torch.getRemainingBurnTime() <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
-        } else {
-            if (current > 0) torch.setRemainingBurnTime(current - 1);
-            if (torch.getRemainingBurnTime() <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
+        long decrement = isActuallyRainingAt(world, pos) ? (long) Math.ceil(ConfigCache.getRainTorchMultiplier()) : 1;
+
+        long newBurn = Math.max(current - decrement, 0);
+        if (newBurn != current) {
+            torch.setRemainingBurnTime(newBurn);
+            if (newBurn <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
         }
     }
 
@@ -180,12 +203,12 @@ public class BurnTimeManager {
 
         if (current > max) lantern.setRemainingBurnTime(max);
 
-        if (ConfigCache.isRainExtinguishEnabled() && world.isRaining() && world.isSkyVisible(pos)) {
-            if (current > 0) lantern.setRemainingBurnTime(current - (long) Math.ceil(ConfigCache.getRainLanternMultiplier()));
-            if (lantern.getRemainingBurnTime() <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
-        } else {
-            if (current > 0) lantern.setRemainingBurnTime(current - 1);
-            if (lantern.getRemainingBurnTime() <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
+        long decrement = isActuallyRainingAt(world, pos) ? (long) Math.ceil(ConfigCache.getRainLanternMultiplier()) : 1;
+
+        long newBurn = Math.max(current - decrement, 0);
+        if (newBurn != current) {
+            lantern.setRemainingBurnTime(newBurn);
+            if (newBurn <= 0) BurnableLightUtil.convertToUnlit(world, pos, state);
         }
     }
 
@@ -195,20 +218,17 @@ public class BurnTimeManager {
         long current = nbt.contains(BURN_TIME_KEY) ? nbt.getLong(BURN_TIME_KEY) : max;
 
         if (current > max) current = max;
-        nbt.putLong(BURN_TIME_KEY, current);
-        campfire.readNbt(nbt);
-        campfire.markDirty();
 
-        if (current > 0) {
-            long decrement = (ConfigCache.isRainExtinguishEnabled() && world.isRaining() && world.isSkyVisible(pos))
-                    ? (long) Math.ceil(ConfigCache.getRainCampfireMultiplier()) : 1;
-            current -= decrement;
-            nbt.putLong(BURN_TIME_KEY, current);
+        long decrement = isActuallyRainingAt(world, pos) ? (long) Math.ceil(ConfigCache.getRainCampfireMultiplier()) : 1;
+
+        long newBurn = Math.max(current - decrement, 0);
+        if (newBurn != current) {
+            nbt.putLong(BURN_TIME_KEY, newBurn);
             campfire.readNbt(nbt);
             campfire.markDirty();
         }
 
-        if (current <= 0) {
+        if (newBurn <= 0) {
             world.setBlockState(pos, state.with(CampfireBlock.LIT, false), Block.NOTIFY_ALL);
             nbt.remove(BURN_TIME_KEY);
             campfire.readNbt(nbt);
@@ -216,7 +236,7 @@ public class BurnTimeManager {
         }
     }
 
-    // --- Utilities for ItemStacks ---
+    // --- Utilities ---
     public static long getMaxBurnTime(ItemStack stack) {
         if (stack.getItem() == Items.TORCH) return ConfigCache.getTorchBurnTime();
         if (stack.getItem() == Items.LANTERN) return ConfigCache.getLanternBurnTime();
@@ -233,7 +253,6 @@ public class BurnTimeManager {
         stack.getOrCreateNbt().putLong(BURN_TIME_KEY, Math.min(burnTime, getMaxBurnTime(stack)));
     }
 
-    // --- Utilities for BlockEntities ---
     public static long getCurrentBurnTime(BlockEntity entity) {
         if (entity instanceof TorchBlockEntity torch) return torch.getRemainingBurnTime();
         if (entity instanceof LanternBlockEntity lantern) return lantern.getRemainingBurnTime();
@@ -257,8 +276,12 @@ public class BurnTimeManager {
         }
     }
 
-    /** Initialize a new ItemStack’s burn time to max */
     public static void initializeBurnTime(ItemStack stack) {
         setCurrentBurnTime(stack, getMaxBurnTime(stack));
+    }
+
+    // --- Centralized rain check ---
+    public static boolean isActuallyRainingAt(World world, BlockPos pos) {
+        return ConfigCache.isRainExtinguishEnabled() && world.isRaining() && world.isSkyVisible(pos) && world.hasRain(pos);
     }
 }
