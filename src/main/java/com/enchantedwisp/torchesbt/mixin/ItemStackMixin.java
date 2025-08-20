@@ -56,4 +56,15 @@ public class ItemStackMixin {
             cir.setReturnValue((int) (13.0 * current / max));
         }
     }
+
+    @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
+    private void getMaxCount(CallbackInfoReturnable<Integer> cir) {
+        ItemStack stack = (ItemStack) (Object) this;
+        if ((stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) && stack.hasNbt()) {
+            assert stack.getNbt() != null;
+            if (stack.getNbt().contains("remaining_burn")) {
+                cir.setReturnValue(1); // Prevent stacking if the item has burn time
+            }
+        }
+    }
 }

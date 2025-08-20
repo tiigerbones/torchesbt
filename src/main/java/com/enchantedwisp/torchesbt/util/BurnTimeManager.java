@@ -24,7 +24,7 @@ import static com.enchantedwisp.torchesbt.util.DynamicLightManager.isDynamicLigh
 public class BurnTimeManager {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
     public static final String BURN_TIME_KEY = "remaining_burn";
-    private static final int ITEM_UPDATE_INTERVAL = 10; // every 0.5s
+    private static final int ITEM_UPDATE_INTERVAL = 5;
     private static final int SCAN_RADIUS = 32;
     private static final int SCAN_VERTICAL = 8;
 
@@ -43,14 +43,47 @@ public class BurnTimeManager {
 
     // --- Player-held items ---
     private static void processPlayerBurnTimes(PlayerEntity player) {
+        if (!isDynamicLightingModLoaded()) return; // Only run if dynamic lighting is present
+
         World world = player.getWorld();
         if (world.isClient) return;
 
         for (Hand hand : Hand.values()) {
             ItemStack stack = player.getStackInHand(hand);
-            if (isBurnableItem(stack)) processBurnableItem(stack, world, player, hand);
+            if (!isBurnableItem(stack)) continue;
+
+            NbtCompound stackNbt = stack.getOrCreateNbt();
+
+            // --- If the item already has burn time, just tick normally ---
+            if (stackNbt.contains(BURN_TIME_KEY)) {
+                processBurnableItem(stack, world, player, hand);
+                continue;
+            }
+
+            // --- Item has no burn time: split stack if necessary ---
+            if (stack.getCount() > 1) {
+                ItemStack burningItem = stack.copyWithCount(1);
+                initializeBurnTime(burningItem); // Initialize only one item
+                stack.decrement(1); // Reduce original stack by one
+                player.setStackInHand(hand, burningItem);
+
+                // Try to put the remaining stack back into inventory
+                if (!player.getInventory().insertStack(stack)) {
+                    player.dropItem(stack, false); // Drop on ground if inventory full
+                    LOGGER.debug("Dropped remaining stack for player {}: item={}, count={}",
+                            player.getName().getString(), stack.getItem(), stack.getCount());
+                } else {
+                    LOGGER.debug("Moved remaining stack to inventory for player {}: item={}, count={}",
+                            player.getName().getString(), stack.getItem(), stack.getCount());
+                }
+            } else {
+                // Only one item: just initialize burn time
+                initializeBurnTime(stack);
+                player.setStackInHand(hand, stack);
+            }
         }
     }
+
 
     // --- Nearby blocks + dropped items ---
     private static void processNearbyBurnables(PlayerEntity player) {

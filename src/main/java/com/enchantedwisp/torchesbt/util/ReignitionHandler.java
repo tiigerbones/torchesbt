@@ -21,6 +21,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.entity.ItemEntity;
 import org.slf4j.Logger;
 
 public class ReignitionHandler {
@@ -76,11 +77,10 @@ public class ReignitionHandler {
 
                 // --- Campfire block ---
                 if (state.getBlock() == Blocks.CAMPFIRE && !state.get(CampfireBlock.LIT)) {
-                    BlockState newState = state.with(CampfireBlock.LIT, true);
-                    world.setBlockState(pos, newState);
+                    world.setBlockState(pos, state.with(CampfireBlock.LIT, true));
                     BlockEntity entity = world.getBlockEntity(pos);
                     if (entity instanceof CampfireBlockEntity campfire) {
-                        BurnableLightUtil.setBurnTimeOnPlacement(world, pos, campfire, stack, ConfigCache.getCampfireBurnTime());
+                        BurnTimeManager.setCurrentBurnTime(campfire, BurnTimeManager.getCurrentBurnTime(campfire) + JsonLoader.IGNITERS.get(itemId));
                     }
                     consumeIgniter(stack, player, hand);
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
@@ -93,10 +93,10 @@ public class ReignitionHandler {
             // FUELS
             // -------------------------------
             if (JsonLoader.CAMPFIRE_FUELS.containsKey(itemId) && state.getBlock() == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT)) {
-                long addTime = JsonLoader.CAMPFIRE_FUELS.get(itemId) * 20L; // JSON in seconds
                 BlockEntity entity = world.getBlockEntity(pos);
                 if (entity instanceof CampfireBlockEntity campfire) {
                     long current = BurnTimeManager.getCurrentBurnTime(campfire);
+                    long addTime = JsonLoader.CAMPFIRE_FUELS.get(itemId);
                     BurnTimeManager.setCurrentBurnTime(campfire, current + addTime);
                     consumeFuel(stack, player, hand);
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
@@ -106,10 +106,10 @@ public class ReignitionHandler {
             }
 
             if (JsonLoader.LANTERN_FUELS.containsKey(itemId) && state.getBlock() == Blocks.LANTERN) {
-                long addTime = JsonLoader.LANTERN_FUELS.get(itemId) * 20L; // JSON in seconds
                 BlockEntity entity = world.getBlockEntity(pos);
                 if (entity instanceof LanternBlockEntity lantern) {
                     long current = lantern.getRemainingBurnTime();
+                    long addTime = JsonLoader.LANTERN_FUELS.get(itemId);
                     lantern.setRemainingBurnTime(current + addTime);
                     consumeFuel(stack, player, hand);
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
@@ -133,23 +133,53 @@ public class ReignitionHandler {
 
             // Torch item reignition
             if (stack.getItem() == RegistryHandler.UNLIT_TORCH && JsonLoader.IGNITERS.containsKey(offId)) {
-                ItemStack newStack = new ItemStack(Items.TORCH, stack.getCount());
+                int stackCount = stack.getCount();
+                ItemStack newStack = new ItemStack(Items.TORCH, 1); // Ignite only one torch
                 BurnTimeManager.setCurrentBurnTime(newStack, BurnTimeManager.getMaxBurnTime(newStack));
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
-                LOGGER.debug("Converted unlit torch to lit torch in player {} hand: {}", player.getName().getString(), newStack.getItem());
+
+                // Handle remaining unlit torches
+                if (stackCount > 1) {
+                    ItemStack remainingStack = new ItemStack(RegistryHandler.UNLIT_TORCH, stackCount - 1);
+                    if (!player.getInventory().insertStack(remainingStack)) {
+                        // No inventory space, drop the remaining stack
+                        ItemEntity itemEntity = new ItemEntity(world, player.getX(), player.getY(), player.getZ(), remainingStack);
+                        world.spawnEntity(itemEntity);
+                        LOGGER.debug("Dropped {} unlit torches at {} due to full inventory for player {}", stackCount - 1, player.getPos(), player.getName().getString());
+                    } else {
+                        LOGGER.debug("Moved {} unlit torches to inventory for player {}", stackCount - 1, player.getName().getString());
+                    }
+                }
+
+                LOGGER.debug("Converted 1 unlit torch to lit torch in player {} hand: {}", player.getName().getString(), newStack.getItem());
                 return TypedActionResult.success(newStack);
             }
 
             // Lantern item reignition
             if (stack.getItem() == RegistryHandler.UNLIT_LANTERN && JsonLoader.IGNITERS.containsKey(offId)) {
-                ItemStack newStack = new ItemStack(Items.LANTERN, stack.getCount());
+                int stackCount = stack.getCount();
+                ItemStack newStack = new ItemStack(Items.LANTERN, 1); // Ignite only one lantern
                 BurnTimeManager.setCurrentBurnTime(newStack, BurnTimeManager.getMaxBurnTime(newStack));
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
-                LOGGER.debug("Converted unlit lantern to lit lantern in player {} hand: {}", player.getName().getString(), newStack.getItem());
+
+                // Handle remaining unlit lanterns
+                if (stackCount > 1) {
+                    ItemStack remainingStack = new ItemStack(RegistryHandler.UNLIT_LANTERN, stackCount - 1);
+                    if (!player.getInventory().insertStack(remainingStack)) {
+                        // No inventory space, drop the remaining stack
+                        ItemEntity itemEntity = new ItemEntity(world, player.getX(), player.getY(), player.getZ(), remainingStack);
+                        world.spawnEntity(itemEntity);
+                        LOGGER.debug("Dropped {} unlit lanterns at {} due to full inventory for player {}", stackCount - 1, player.getPos(), player.getName().getString());
+                    } else {
+                        LOGGER.debug("Moved {} unlit lanterns to inventory for player {}", stackCount - 1, player.getName().getString());
+                    }
+                }
+
+                LOGGER.debug("Converted 1 unlit lantern to lit lantern in player {} hand: {}", player.getName().getString(), newStack.getItem());
                 return TypedActionResult.success(newStack);
             }
 
