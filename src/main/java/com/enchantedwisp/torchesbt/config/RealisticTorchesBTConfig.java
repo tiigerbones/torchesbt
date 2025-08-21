@@ -28,13 +28,13 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster)")
     public double rainTorchMultiplier = 10.0;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 1.5 (8.5x faster)")
+    @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster)")
     public double rainCampfireMultiplier = 8.5;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (6.8x faster)")
+    @Comment("Burn time multiplier for lanterns in rain. Default: 6.5 (6.5x faster)")
     public double rainLanternMultiplier = 6.5;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (7.5x faster)")
+    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster)")
     public double waterLanternMultiplier = 7.5;
 
     @Override
