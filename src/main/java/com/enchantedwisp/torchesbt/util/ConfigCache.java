@@ -14,6 +14,8 @@ public class ConfigCache {
     private static double rainTorchMultiplier;
     private static double rainCampfireMultiplier;
     private static double rainLanternMultiplier;
+    private static double waterLanternMultiplier;
+
 
     public static void initialize() {
         RealisticTorchesBTConfig config = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class).getConfig();
@@ -24,6 +26,7 @@ public class ConfigCache {
         rainTorchMultiplier = config.rainTorchMultiplier;
         rainCampfireMultiplier = config.rainCampfireMultiplier;
         rainLanternMultiplier = config.rainLanternMultiplier;
+        waterLanternMultiplier = config.waterLanternMultiplier;
         LOGGER.info("Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}", torchBurnTime, enableRainExtinguish);
     }
 
@@ -35,4 +38,5 @@ public class ConfigCache {
     public static double getRainTorchMultiplier() { return rainTorchMultiplier; }
     public static double getRainCampfireMultiplier() { return rainCampfireMultiplier; }
     public static double getRainLanternMultiplier() { return rainLanternMultiplier; }
+    public static double getwaterLanternMultiplier() { return waterLanternMultiplier; }
 }

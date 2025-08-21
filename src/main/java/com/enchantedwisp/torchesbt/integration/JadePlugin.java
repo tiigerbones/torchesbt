@@ -1,14 +1,19 @@
 package com.enchantedwisp.torchesbt.integration;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 
+/**
+ * Integration with Jade to display burn time tooltips for burnable blocks.
+ */
 public class JadePlugin implements IWailaPlugin {
 
     @Override
@@ -25,7 +30,7 @@ public class JadePlugin implements IWailaPlugin {
                                 accessor.getBlockState().get(net.minecraft.block.CampfireBlock.LIT))) {
 
                     long burnTime = BurnTimeManager.getCurrentBurnTime(accessor.getBlockEntity());
-                    long maxBurnTime = getMaxBurnTime(accessor.getBlock());
+                    long maxBurnTime = getMaxBurnTime(accessor.getBlock(), accessor.getBlockEntity());
 
                     if (burnTime > 0 && maxBurnTime > 0) {
                         tooltip.add(Text.literal("Burn Time: " + (burnTime / 20) + "/" + (maxBurnTime / 20)));
@@ -33,11 +38,9 @@ public class JadePlugin implements IWailaPlugin {
                 }
             }
 
-            private long getMaxBurnTime(net.minecraft.block.Block block) {
-                if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
-                    return ConfigCache.getTorchBurnTime();
-                } else if (block == Blocks.LANTERN) {
-                    return ConfigCache.getLanternBurnTime();
+            private long getMaxBurnTime(net.minecraft.block.Block block, BlockEntity entity) {
+                if (entity instanceof Burnable burnable) {
+                    return burnable.getMaxBurnTime();
                 } else if (block == Blocks.CAMPFIRE) {
                     return ConfigCache.getCampfireBurnTime();
                 }

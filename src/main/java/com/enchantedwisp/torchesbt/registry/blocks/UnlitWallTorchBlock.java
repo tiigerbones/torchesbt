@@ -2,13 +2,16 @@ package com.enchantedwisp.torchesbt.registry.blocks;
 
 
 import com.enchantedwisp.torchesbt.registry.Particles;
+import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.WallTorchBlock;
+import net.minecraft.item.ItemStack;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
 public class UnlitWallTorchBlock extends WallTorchBlock {
@@ -44,5 +47,8 @@ public class UnlitWallTorchBlock extends WallTorchBlock {
         }
     }
 
-
+    @Override
+    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
+        return new ItemStack(RegistryHandler.UNLIT_TORCH);
+    }
 }

@@ -25,14 +25,17 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.Gui.PrefixText
     public boolean enableRainExtinguish = true;
 
-    @Comment("Burn time multiplier for torches in rain. Default: 2.0 (2x faster)")
-    public double rainTorchMultiplier = 2.0;
+    @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster)")
+    public double rainTorchMultiplier = 10.0;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 1.5 (1.5x faster)")
-    public double rainCampfireMultiplier = 1.5;
+    @Comment("Burn time multiplier for campfires in rain. Default: 1.5 (8.5x faster)")
+    public double rainCampfireMultiplier = 8.5;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (0.8x faster)")
-    public double rainLanternMultiplier = 0.8;
+    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (6.8x faster)")
+    public double rainLanternMultiplier = 6.5;
+
+    @Comment("Burn time multiplier for campfires in rain. Default: 0.8 (7.5x faster)")
+    public double waterLanternMultiplier = 7.5;
 
     @Override
     public void validatePostLoad() {
@@ -48,6 +51,10 @@ public class RealisticTorchesBTConfig implements ConfigData {
         if (rainLanternMultiplier < 1.0 || rainLanternMultiplier > 10.0) {
             RealisticTorchesBT.LOGGER.warn("Correcting rainLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainLanternMultiplier, Math.max(1.0, Math.min(10.0, rainLanternMultiplier)));
             rainLanternMultiplier = Math.max(1.0, Math.min(10.0, rainLanternMultiplier));
+        }
+        if (waterLanternMultiplier < 1.0 || waterLanternMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting waterLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", waterLanternMultiplier, Math.max(1.0, Math.min(10.0, rainLanternMultiplier)));
+            waterLanternMultiplier = Math.max(1.0, Math.min(10.0, waterLanternMultiplier));
         }
     }
 }

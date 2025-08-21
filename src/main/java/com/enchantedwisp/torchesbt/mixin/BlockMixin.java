@@ -2,9 +2,8 @@ package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import com.enchantedwisp.torchesbt.burn.Burnable;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -15,6 +14,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Mixin to modify block drop behavior for burnable blocks.
+ */
 @Mixin(Block.class)
 public class BlockMixin {
 
@@ -27,7 +29,7 @@ public class BlockMixin {
 
         Block block = state.getBlock();
         if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.LANTERN ||
-                (block == Blocks.CAMPFIRE && state.get(net.minecraft.block.CampfireBlock.LIT))) {
+                (block == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT))) {
             if (blockEntity != null) {
                 long remainingBurnTime = BurnTimeManager.getCurrentBurnTime(blockEntity);
                 RealisticTorchesBT.LOGGER.debug("Block broken at {} with remaining burn time: {}", pos, remainingBurnTime);

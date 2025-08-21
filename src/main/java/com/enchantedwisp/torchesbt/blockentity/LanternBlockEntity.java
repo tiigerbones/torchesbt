@@ -1,32 +1,39 @@
 package com.enchantedwisp.torchesbt.blockentity;
 
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
-public class LanternBlockEntity extends BlockEntity {
+/**
+ * Block entity for lanterns, tracking their burn time.
+ * Implements Burnable for standardized burn time management.
+ */
+public class LanternBlockEntity extends BlockEntity implements Burnable {
     private static final String REMAINING_KEY = "remaining_burn";
-    private long remainingBurnTime; // only remaining, not max
+    private long remainingBurnTime;
 
     public LanternBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LANTERN_BLOCK_ENTITY, pos, state);
-        this.remainingBurnTime = getMaxBurnTime(); // initialize full
+        this.remainingBurnTime = getMaxBurnTime();
     }
 
-    /** Returns the max burn time from config (dynamic). */
+    @Override
     public long getMaxBurnTime() {
         return ConfigCache.getLanternBurnTime();
     }
 
-    /** Returns remaining burn time. */
+    @Override
     public long getRemainingBurnTime() {
         return remainingBurnTime;
     }
 
-    /** Set remaining burn time (clamped). */
+    @Override
     public void setRemainingBurnTime(long time) {
         this.remainingBurnTime = Math.max(0, Math.min(time, getMaxBurnTime()));
         markDirty();
@@ -35,11 +42,18 @@ public class LanternBlockEntity extends BlockEntity {
         }
     }
 
-    /** Reduce remaining time by 1 tick. */
-    public void tickBurn() {
-        if (remainingBurnTime > 0) {
-            setRemainingBurnTime(remainingBurnTime - 1);
-        }
+    @Override
+    public void tickBurn(World world, boolean isBlock) {
+        if (remainingBurnTime <= 0) return;
+
+        double multiplier = isBlock && BurnTimeManager.isActuallyRainingAt(world, pos) ? getRainMultiplier() : 1.0;
+        long reduction = (long) Math.ceil(multiplier);
+        setRemainingBurnTime(remainingBurnTime - reduction);
+    }
+
+    @Override
+    public double getRainMultiplier() {
+        return ConfigCache.getRainLanternMultiplier();
     }
 
     @Override

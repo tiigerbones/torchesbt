@@ -1,12 +1,9 @@
 package com.enchantedwisp.torchesbt.mixin;
 
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
-import com.enchantedwisp.torchesbt.burn.BurnableLightUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallTorchBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -14,6 +11,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 
+/**
+ * Mixin to add block entity support and burn time handling for WallTorchBlock.
+ */
 @Mixin(WallTorchBlock.class)
 public abstract class WallTorchBlockMixin extends Block implements BlockEntityProvider {
     public WallTorchBlockMixin(Settings settings) {
@@ -30,7 +30,7 @@ public abstract class WallTorchBlockMixin extends Block implements BlockEntityPr
         super.onPlaced(world, pos, state, placer, itemStack);
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity instanceof TorchBlockEntity) {
-            BurnableLightUtil.setBurnTimeOnPlacement(world, pos, entity, itemStack, ConfigCache.getTorchBurnTime());
+            BurnTimeManager.setBurnTimeOnPlacement(world, pos, entity, itemStack, ConfigCache.getTorchBurnTime());
         }
     }
 }

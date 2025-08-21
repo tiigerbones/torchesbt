@@ -30,5 +30,6 @@
 
   "config.torchesbt.rainTorchMultiplier": "Multiplier for Torches",
   "config.torchesbt.rainCampfireMultiplier": "Multiplier for Campfires",
-  "config.torchesbt.rainLanternMultiplier": "Multiplier for Lanterns"
+  "config.torchesbt.rainLanternMultiplier": "Multiplier for Lanterns",
+  "config.torchesbt.waterLanternMultiplier": "Multiplier for submerged Lanterns"
 }

@@ -25,24 +25,31 @@ public class RTorchesConfigScreen {
                 .build());
 
         environment.addEntry(entryBuilder.startDoubleField(Text.translatable("config.torchesbt.rainTorchMultiplier"), config.rainTorchMultiplier)
-                .setDefaultValue(2.0)
+                .setDefaultValue(10.0)
                 .setMin(1.0)
                 .setMax(10.0)
                 .setSaveConsumer(newValue -> config.rainTorchMultiplier = newValue)
                 .build());
 
         environment.addEntry(entryBuilder.startDoubleField(Text.translatable("config.torchesbt.rainCampfireMultiplier"), config.rainCampfireMultiplier)
-                .setDefaultValue(1.5)
+                .setDefaultValue(8.5)
                 .setMin(1.0)
                 .setMax(10.0)
                 .setSaveConsumer(newValue -> config.rainCampfireMultiplier = newValue)
                 .build());
 
         environment.addEntry(entryBuilder.startDoubleField(Text.translatable("config.torchesbt.rainLanternMultiplier"), config.rainCampfireMultiplier)
-                .setDefaultValue(0.8)
+                .setDefaultValue(6.5)
                 .setMin(1.0)
                 .setMax(10.0)
                 .setSaveConsumer(newValue -> config.rainLanternMultiplier = newValue)
+                .build());
+
+        environment.addEntry(entryBuilder.startDoubleField(Text.translatable("config.torchesbt.waterLanternMultiplier"), config.waterLanternMultiplier)
+                .setDefaultValue(6.5)
+                .setMin(1.0)
+                .setMax(10.0)
+                .setSaveConsumer(newValue -> config.waterLanternMultiplier = newValue)
                 .build());
         return builder.build();
     }
