@@ -2,19 +2,20 @@ package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
+import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.CampfireBlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -138,7 +139,7 @@ public class BurnTimeManager {
             // Check for water submersion
             FluidState fluidState = world.getFluidState(pos);
             if (fluidState.isIn(FluidTags.WATER)) {
-                if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
+                if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.CAMPFIRE) {
                     replaceBurnableBlock(world, pos, block);
                     LOGGER.debug("Instantly unlit {} at {} due to water submersion", block, pos);
                     continue;
@@ -241,24 +242,48 @@ public class BurnTimeManager {
 
     private static void tickCampfire(World world, BlockPos pos, BlockState state) {
         BlockEntity entity = world.getBlockEntity(pos);
-        if (!(entity instanceof CampfireBlockEntity)) return;
+        if (!(entity instanceof ICampfireBurnAccessor accessor)) return;
 
-        NbtCompound nbt = entity.createNbt();
-        long currentBurnTime = nbt.contains(BURN_TIME_KEY) ? nbt.getLong(BURN_TIME_KEY) : ConfigCache.getCampfireBurnTime();
+        long currentBurnTime = accessor.torchesbt_getBurnTime();
 
         if (currentBurnTime <= 0) {
+            // Eject items being cooked
+            for (ItemStack stack : accessor.torchesbt_getItems()) {
+                if (!stack.isEmpty()) {
+                    ItemEntity drop = new ItemEntity(
+                            world,
+                            pos.getX() + 0.5,
+                            pos.getY() + 1.0,
+                            pos.getZ() + 0.5,
+                            stack.copy()
+                    );
+                    world.spawnEntity(drop);
+                }
+            }
+            accessor.torchesbt_getItems().clear();
+
+            // Extinguish campfire
             world.setBlockState(pos, state.with(CampfireBlock.LIT, false), 3);
+            world.playSound(null, pos,
+                    SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE,
+                    SoundCategory.BLOCKS,
+                    1.0F, 1.0F);
+
             LOGGER.debug("Extinguished campfire at {}: burn time reached 0", pos);
             return;
         }
 
-        double multiplier = isActuallyRainingAt(world, pos) ? ConfigCache.getRainCampfireMultiplier() : 1.0;
+        // Tick down
+        double multiplier = isActuallyRainingAt(world, pos)
+                ? ConfigCache.getRainCampfireMultiplier()
+                : 1.0;
         long reduction = (long) Math.ceil(multiplier);
-        nbt.putLong(BURN_TIME_KEY, currentBurnTime - reduction);
-        entity.readNbt(nbt);
-        entity.markDirty();
-        LOGGER.debug("Ticked burn time for campfire at {}: {} -> {}", pos, currentBurnTime, currentBurnTime - reduction);
+        accessor.torchesbt_setBurnTime(currentBurnTime - reduction);
+
+        LOGGER.debug("Ticked burn time for campfire at {}: {} -> {}",
+                pos, currentBurnTime, accessor.torchesbt_getBurnTime());
     }
+
 
     private static void replaceBurnableBlock(World world, BlockPos pos, Block block) {
         // Only replace lit blocks
@@ -299,14 +324,13 @@ public class BurnTimeManager {
     }
 
     public static void setBurnTimeOnPlacement(World world, BlockPos pos, BlockEntity entity, ItemStack stack, long defaultBurnTime) {
-        long burnTime = stack.hasNbt() && stack.getNbt().contains(BURN_TIME_KEY) ? stack.getNbt().getLong(BURN_TIME_KEY) : defaultBurnTime;
+        long burnTime = stack.hasNbt() && stack.getNbt() != null && stack.getNbt().contains(BURN_TIME_KEY)
+                ? stack.getNbt().getLong(BURN_TIME_KEY)
+                : defaultBurnTime;
         if (entity instanceof Burnable burnable) {
             burnable.setRemainingBurnTime(burnTime);
-        } else if (entity instanceof CampfireBlockEntity campfire) {
-            NbtCompound nbt = campfire.createNbt();
-            nbt.putLong(BURN_TIME_KEY, burnTime);
-            campfire.readNbt(nbt);
-            campfire.markDirty();
+        } else if (entity instanceof ICampfireBurnAccessor accessor) {
+            accessor.torchesbt_setBurnTime(burnTime);
         }
         LOGGER.debug("Set burn time for block at {} to {}", pos, burnTime);
     }
@@ -335,10 +359,11 @@ public class BurnTimeManager {
     }
 
     public static long getCurrentBurnTime(BlockEntity entity) {
-        if (entity instanceof Burnable burnable) return burnable.getRemainingBurnTime();
-        if (entity instanceof CampfireBlockEntity campfire) {
-            NbtCompound nbt = campfire.createNbt();
-            return nbt.contains(BURN_TIME_KEY) ? nbt.getLong(BURN_TIME_KEY) : ConfigCache.getCampfireBurnTime();
+        if (entity instanceof Burnable burnable) {
+            return burnable.getRemainingBurnTime();
+        }
+        if (entity instanceof ICampfireBurnAccessor accessor) {
+            return accessor.torchesbt_getBurnTime();
         }
         return 0;
     }
@@ -346,11 +371,9 @@ public class BurnTimeManager {
     public static void setCurrentBurnTime(BlockEntity entity, long burnTime) {
         if (entity instanceof Burnable burnable) {
             burnable.setRemainingBurnTime(burnTime);
-        } else if (entity instanceof CampfireBlockEntity campfire) {
-            NbtCompound nbt = campfire.createNbt();
-            nbt.putLong(BURN_TIME_KEY, burnTime);
-            campfire.readNbt(nbt);
-            campfire.markDirty();
+        } else if (entity instanceof ICampfireBurnAccessor accessor) {
+            accessor.torchesbt_setBurnTime(burnTime);
+            entity.markDirty();
         }
     }
 
