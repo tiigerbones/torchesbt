@@ -1,8 +1,8 @@
 package com.enchantedwisp.torchesbt.mixin;
 
+import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -13,11 +13,11 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.Overwrite;
 
 /**
  * Adds custom burn time tracking to vanilla CampfireBlockEntity.
@@ -40,10 +40,6 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
     private void torchesbt_readNbt(NbtCompound nbt, CallbackInfo ci) {
         if (nbt.contains(BurnTimeUtils.BURN_TIME_KEY)) {
             torchesbt_burnTime = nbt.getLong(BurnTimeUtils.BURN_TIME_KEY);
-        } else if (getCachedState().get(net.minecraft.block.CampfireBlock.LIT)) {
-            // Initialize burn time for lit campfires on load if NBT doesn't have it
-            torchesbt_burnTime = ConfigCache.getCampfireBurnTime();
-            markDirty();
         }
     }
 
@@ -83,3 +79,4 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
         return createNbt();
     }
 }
+
