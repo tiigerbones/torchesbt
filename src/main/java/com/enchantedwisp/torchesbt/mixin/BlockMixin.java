@@ -28,8 +28,7 @@ public class BlockMixin {
         if (world.isClient) return;
 
         Block block = state.getBlock();
-        if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.LANTERN ||
-                (block == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT))) {
+        if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.LANTERN) {
             if (blockEntity != null) {
                 long remainingBurnTime = BurnTimeManager.getCurrentBurnTime(blockEntity);
                 RealisticTorchesBT.LOGGER.debug("Block broken at {} with remaining burn time: {}", pos, remainingBurnTime);
@@ -40,28 +39,20 @@ public class BlockMixin {
                     // Drop lit item with remaining burn time
                     if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
                         drop = new ItemStack(Blocks.TORCH.asItem());
-                    } else if (block == Blocks.LANTERN) {
+                    } else {
                         drop = new ItemStack(Blocks.LANTERN.asItem());
-                    } else if (block == Blocks.CAMPFIRE) {
-                        drop = new ItemStack(Blocks.CAMPFIRE.asItem());
                     }
-                    if (drop != null) {
-                        BurnTimeManager.setCurrentBurnTime(drop, remainingBurnTime);
-                    }
+                    BurnTimeManager.setCurrentBurnTime(drop, remainingBurnTime);
                 } else {
                     // Drop unlit variant
                     if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
                         drop = new ItemStack(com.enchantedwisp.torchesbt.registry.RegistryHandler.UNLIT_TORCH);
-                    } else if (block == Blocks.LANTERN) {
+                    } else {
                         drop = new ItemStack(com.enchantedwisp.torchesbt.registry.RegistryHandler.UNLIT_LANTERN);
-                    } else if (block == Blocks.CAMPFIRE) {
-                        drop = new ItemStack(com.enchantedwisp.torchesbt.registry.RegistryHandler.UNLIT_CAMPFIRE);
                     }
                 }
-                if (drop != null) {
-                    Block.dropStack(world, pos, drop);
-                    RealisticTorchesBT.LOGGER.debug("Dropped item {} at {} with burn time {}", drop.getItem(), pos, remainingBurnTime);
-                }
+                Block.dropStack(world, pos, drop);
+                RealisticTorchesBT.LOGGER.debug("Dropped item {} at {} with burn time {}", drop.getItem(), pos, remainingBurnTime);
 
                 // Cancel default drop behavior to avoid duplicates
                 ci.cancel();
