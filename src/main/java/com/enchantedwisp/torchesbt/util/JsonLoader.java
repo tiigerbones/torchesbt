@@ -25,6 +25,7 @@ public class JsonLoader {
     public static final Map<Identifier, Integer> IGNITERS = new HashMap<>();
     public static final Map<Identifier, Integer> CAMPFIRE_FUELS = new HashMap<>();
     public static final Map<Identifier, Integer> LANTERN_FUELS = new HashMap<>();
+    public static final Map<Identifier, Integer> TORCH_FUELS = new HashMap<>();
 
     public static void register() {
         // Register reload listener for server data
@@ -33,11 +34,13 @@ public class JsonLoader {
             IGNITERS.clear();
             CAMPFIRE_FUELS.clear();
             LANTERN_FUELS.clear();
+            TORCH_FUELS.clear();
 
             // Load JSONs
             loadJsonFiles(manager, "ignite", IGNITERS, "ignite_amount");
             loadJsonFiles(manager, "fuel/campfire", CAMPFIRE_FUELS, "add_time");
             loadJsonFiles(manager, "fuel/lantern", LANTERN_FUELS, "add_time");
+            loadJsonFiles(manager, "fuel/torch", TORCH_FUELS, "add_time");
         });
         LOGGER.info("Registered JSON loader for server startup");
     }
