@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt.mixin;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -50,7 +51,7 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
 
     @Override
     public void torchesbt_setBurnTime(long time) {
-        this.torchesbt_burnTime = Math.max(0, time);
+        this.torchesbt_burnTime = Math.max(0, Math.min(time, ConfigCache.getCampfireBurnTime()));
         markDirty();
     }
 
