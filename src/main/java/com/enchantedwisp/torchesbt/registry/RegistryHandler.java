@@ -4,12 +4,14 @@ import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitLanternBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitTorchBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitWallTorchBlock;
+import com.enchantedwisp.torchesbt.registry.items.SparkStoneItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitCampFireItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitLanternItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitTorchItem;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -23,9 +25,11 @@ public class RegistryHandler {
     public static final Item UNLIT_TORCH = new UnlitTorchItem((UnlitTorchBlock) UNLIT_TORCH_BLOCK, new Item.Settings());
     public static final Item UNLIT_LANTERN = new UnlitLanternItem(UNLIT_LANTERN_BLOCK, new Item.Settings());
     public static final Item UNLIT_CAMPFIRE = new UnlitCampFireItem(new Item.Settings());
+    public static final Item SPARK_STONE = new SparkStoneItem(new Item.Settings().maxCount(1).maxDamage(20));
 
     public static void register() {
         registerItemGroups();
+        registerUnlitGroups();
         RealisticTorchesBT.LOGGER.info("Registering blocks, items, and block entities for Realistic torches BT");
 
         Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "unlit_torch"), UNLIT_TORCH_BLOCK);
@@ -34,13 +38,21 @@ public class RegistryHandler {
         Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "unlit_torch"), UNLIT_TORCH);
         Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "unlit_lantern"), UNLIT_LANTERN);
         Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "unlit_campfire"), UNLIT_CAMPFIRE);
+        Registry.register(Registries.ITEM, Identifier.of(MOD_ID, "spark_stone"), SPARK_STONE);
     }
 
-    private static void registerItemGroups() {
+    private static void registerUnlitGroups() {
         ItemGroupEvents.modifyEntriesEvent(net.minecraft.item.ItemGroups.FUNCTIONAL).register(entries -> {
             entries.add(UNLIT_TORCH);
             entries.add(UNLIT_LANTERN);
             entries.add(UNLIT_CAMPFIRE);
         });
     }
+
+    private static void registerItemGroups() {
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
+            entries.add(SPARK_STONE);
+        });
+    }
+
 }
