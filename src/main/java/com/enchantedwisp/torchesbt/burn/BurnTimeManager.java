@@ -258,13 +258,18 @@ public class BurnTimeManager {
             return;
         }
 
-        // Tick down
-        double multiplier = BurnTimeUtils.isActuallyRainingAt(world, pos)
-                ? ConfigCache.getRainCampfireMultiplier()
-                : 1.0;
-        long reduction = (long) Math.ceil(multiplier);
-        accessor.torchesbt_setBurnTime(currentBurnTime - reduction);
+    // Tick down
+    double multiplier = BurnTimeUtils.isActuallyRainingAt(world, pos)
+            ? ConfigCache.getRainCampfireMultiplier()
+            : 1.0;
+    long reduction = (long) Math.ceil(multiplier);
+    accessor.torchesbt_setBurnTime(currentBurnTime - reduction);
+
+    // Sync to client for real-time Jade tooltip updates
+    if (!world.isClient) {
+        world.updateListeners(pos, state, state, 3);
     }
+}
 
     private static void replaceBurnableBlock(World world, BlockPos pos, Block block) {
         // Only replace lit blocks
