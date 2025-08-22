@@ -11,6 +11,8 @@
   "block.torchesbt.unlit_lantern": "Lantern",
   "block.torchesbt.unlit_wall_lantern": "Lantern",
 
+  "item.torchesbt.spark_stone": "Spark Stone",
+
 
   "config.torchesbt.category.burnTimes": "Burn Times",
   "config.torchesbt.torchBurnTime": "Torch Burn Time",
@@ -24,7 +26,11 @@
 
 
 
-  "tag.torchesbt.igniters": "Igniters",
+  "tag.torchesbt.strong_igniters": "Strong Igniters",
+  "tag.torchesbt.weak_igniters": "Weak Igniters",
+  "tag.torchesbt.common_fuel": "Common Fuel",
+
+
   "config.torchesbt.enableRainExtinguish": "Rain affects Burntime",
   "config.torchesbt.enableRainExtinguish.tooltip": "Burnout for torches/campfires/lanterns goes faster",
 
