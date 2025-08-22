@@ -159,7 +159,7 @@ public class ReignitionHandler {
                 }
                 int stackCount = stack.getCount();
                 ItemStack newStack = new ItemStack(Items.TORCH, 1);
-                BurnTimeManager.initializeBurnTime(newStack);
+                BurnTimeUtils.initializeBurnTime(newStack);
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
@@ -186,7 +186,7 @@ public class ReignitionHandler {
                 }
                 int stackCount = stack.getCount();
                 ItemStack newStack = new ItemStack(Items.LANTERN, 1);
-                BurnTimeManager.initializeBurnTime(newStack);
+                BurnTimeUtils.initializeBurnTime(newStack);
                 player.setStackInHand(hand, newStack);
                 consumeIgniter(offHandStack, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
                 player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);

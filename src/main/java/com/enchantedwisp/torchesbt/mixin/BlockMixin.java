@@ -2,6 +2,7 @@ package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -30,7 +31,7 @@ public class BlockMixin {
         Block block = state.getBlock();
         if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.LANTERN) {
             if (blockEntity != null) {
-                long remainingBurnTime = BurnTimeManager.getCurrentBurnTime(blockEntity);
+                long remainingBurnTime = BurnTimeUtils.getCurrentBurnTime(blockEntity);
                 RealisticTorchesBT.LOGGER.debug("Block broken at {} with remaining burn time: {}", pos, remainingBurnTime);
 
                 // Custom drop logic
@@ -42,7 +43,7 @@ public class BlockMixin {
                     } else {
                         drop = new ItemStack(Blocks.LANTERN.asItem());
                     }
-                    BurnTimeManager.setCurrentBurnTime(drop, remainingBurnTime);
+                    BurnTimeUtils.setCurrentBurnTime(drop, remainingBurnTime);
                 } else {
                     // Drop unlit variant
                     if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {

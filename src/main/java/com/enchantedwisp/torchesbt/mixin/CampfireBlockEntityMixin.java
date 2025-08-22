@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -30,13 +31,13 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
 
     @Inject(method = "writeNbt", at = @At("TAIL"))
     private void torchesbt_writeNbt(NbtCompound nbt, CallbackInfo ci) {
-        nbt.putLong(BurnTimeManager.BURN_TIME_KEY, torchesbt_burnTime);
+        nbt.putLong(BurnTimeUtils.BURN_TIME_KEY, torchesbt_burnTime);
     }
 
     @Inject(method = "readNbt", at = @At("TAIL"))
     private void torchesbt_readNbt(NbtCompound nbt, CallbackInfo ci) {
-        if (nbt.contains(BurnTimeManager.BURN_TIME_KEY)) {
-            torchesbt_burnTime = nbt.getLong(BurnTimeManager.BURN_TIME_KEY);
+        if (nbt.contains(BurnTimeUtils.BURN_TIME_KEY)) {
+            torchesbt_burnTime = nbt.getLong(BurnTimeUtils.BURN_TIME_KEY);
         }
     }
 

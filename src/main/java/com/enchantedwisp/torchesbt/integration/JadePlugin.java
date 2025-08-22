@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.integration;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
@@ -29,7 +30,7 @@ public class JadePlugin implements IWailaPlugin {
                         (accessor.getBlock() == Blocks.CAMPFIRE &&
                                 accessor.getBlockState().get(net.minecraft.block.CampfireBlock.LIT))) {
 
-                    long burnTime = BurnTimeManager.getCurrentBurnTime(accessor.getBlockEntity());
+                    long burnTime = BurnTimeUtils.getCurrentBurnTime(accessor.getBlockEntity());
                     long maxBurnTime = getMaxBurnTime(accessor.getBlock(), accessor.getBlockEntity());
 
                     if (burnTime > 0 && maxBurnTime > 0) {

@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.blockentity;
 
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.BlockState;
@@ -46,7 +47,7 @@ public class LanternBlockEntity extends BlockEntity implements Burnable {
     public void tickBurn(World world, boolean isBlock) {
         if (remainingBurnTime <= 0) return;
 
-        double multiplier = isBlock && BurnTimeManager.isActuallyRainingAt(world, pos) ? getRainMultiplier() : 1.0;
+        double multiplier = isBlock && BurnTimeUtils.isActuallyRainingAt(world, pos) ? getRainMultiplier() : 1.0;
         long reduction = (long) Math.ceil(multiplier);
         setRemainingBurnTime(remainingBurnTime - reduction);
     }
