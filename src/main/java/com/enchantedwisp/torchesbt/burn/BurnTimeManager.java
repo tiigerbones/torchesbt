@@ -234,21 +234,6 @@ public class BurnTimeManager {
         long currentBurnTime = accessor.torchesbt_getBurnTime();
 
         if (currentBurnTime <= 0) {
-            // Eject items being cooked
-            for (ItemStack stack : accessor.torchesbt_getItems()) {
-                if (!stack.isEmpty()) {
-                    ItemEntity drop = new ItemEntity(
-                            world,
-                            pos.getX() + 0.5,
-                            pos.getY() + 1.0,
-                            pos.getZ() + 0.5,
-                            stack.copy()
-                    );
-                    world.spawnEntity(drop);
-                }
-            }
-            accessor.torchesbt_getItems().clear();
-
             // Extinguish campfire
             world.setBlockState(pos, state.with(CampfireBlock.LIT, false), 3);
             world.playSound(null, pos,
