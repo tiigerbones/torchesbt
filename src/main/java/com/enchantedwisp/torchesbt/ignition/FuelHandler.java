@@ -69,7 +69,7 @@ public class FuelHandler {
                 }
             }
 
-            // Lantern fueling
+            // Torch fueling
             if (JsonLoader.TORCH_FUELS.containsKey(itemId)
                     && (world.getBlockState(pos).getBlock() == Blocks.TORCH || world.getBlockState(pos).getBlock() == Blocks.WALL_TORCH)) {
                 if (entity instanceof Burnable burnable) {

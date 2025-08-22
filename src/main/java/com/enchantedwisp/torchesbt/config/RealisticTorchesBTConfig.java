@@ -8,16 +8,16 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "torchesbt")
 public class RealisticTorchesBTConfig implements ConfigData {
-    @Comment("Burn time for torches. Default: 40")
+    @Comment("Burn time for torches. Default: 40 Max: 3600")
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
     public int torchBurnTime = 40;
 
-    @Comment("Burn time for lanterns. Default: 60")
+    @Comment("Burn time for lanterns. Default: 60 Max: 3600")
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
     public int lanternBurnTime = 60;
 
-    @Comment("Burn time for campfires. Default: 100")
+    @Comment("Burn time for campfires. Default: 100 Max: 3600")
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
     public int campfireBurnTime = 100;
 
@@ -25,16 +25,16 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.Gui.PrefixText
     public boolean enableRainExtinguish = true;
 
-    @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster)")
+    @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster) Max: 10.0x")
     public double rainTorchMultiplier = 10.0;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster)")
+    @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster) Max: 10.0x")
     public double rainCampfireMultiplier = 8.5;
 
-    @Comment("Burn time multiplier for lanterns in rain. Default: 6.5 (6.5x faster)")
+    @Comment("Burn time multiplier for lanterns in rain. Default: 6.5 (6.5x faster) Max: 10.0x")
     public double rainLanternMultiplier = 6.5;
 
-    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster)")
+    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster) Max: 10.0x")
     public double waterLanternMultiplier = 7.5;
 
     @Override
