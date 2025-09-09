@@ -23,6 +23,7 @@ Realistic Torches BT makes fire-based light sources behave more dynamically and 
 - **Dynamic Lighting (Optional)**:
   - Toggleable dynamic lighting support.
   - Configurable via `config/torchesbt.json5`
+  - Held and dropped torches and lanterns lose burn time while Dynamic Light support is enabled.
  
 - **Data-Driven Customization**:
   - All ignition and fuel behaviors are fully editable via JSON files, allowing easy modpack or server customization without code changes.
