@@ -21,9 +21,6 @@
 		"client": [
 			"com.enchantedwisp.torchesbt.client.RealisticTorchesBTClient"
 		],
-      "modmenu": [
-        "com.enchantedwisp.torchesbt.integration.RTorchesModMenu"
-      ],
       "jade": [
         "com.enchantedwisp.torchesbt.integration.JadePlugin"
       ]
