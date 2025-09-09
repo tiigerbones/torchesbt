@@ -18,6 +18,11 @@ public class RTorchesConfigScreen {
         RealisticTorchesBTConfig config = RealisticTorchesBT.getConfig();
         // Environmental Category
         ConfigCategory environment = builder.getOrCreateCategory(Text.literal("Environment"));
+        environment.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.torchesbt.enableDynamicLights"), config.enableDynamicLights)
+                .setDefaultValue(false)
+                .setTooltip(Text.translatable("config.torchesbt.enableDynamicLights.tooltip"))
+                .setSaveConsumer(newValue -> config.enableDynamicLights = newValue)
+                .build());
         environment.addEntry(entryBuilder.startBooleanToggle(Text.translatable("config.torchesbt.enableRainExtinguish"), config.enableRainExtinguish)
                 .setDefaultValue(true)
                 .setTooltip(Text.translatable("config.torchesbt.enableRainExtinguish.tooltip"))

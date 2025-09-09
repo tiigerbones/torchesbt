@@ -15,7 +15,7 @@ public class ConfigCache {
     private static double rainCampfireMultiplier;
     private static double rainLanternMultiplier;
     private static double waterLanternMultiplier;
-
+    private static boolean enableDynamicLights;
 
     public static void initialize() {
         RealisticTorchesBTConfig config = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class).getConfig();
@@ -27,7 +27,19 @@ public class ConfigCache {
         rainCampfireMultiplier = config.rainCampfireMultiplier;
         rainLanternMultiplier = config.rainLanternMultiplier;
         waterLanternMultiplier = config.waterLanternMultiplier;
-        LOGGER.info("Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}", torchBurnTime, enableRainExtinguish);
+        enableDynamicLights = config.enableDynamicLights;
+
+        LOGGER.info(
+            "Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}, dynamicLights={}",
+            torchBurnTime,
+            enableRainExtinguish,
+            enableDynamicLights
+        );
+
+        LOGGER.info(
+            "Dynamic lighting support: {} (config)",
+            enableDynamicLights ? "Enabled" : "Disabled"
+        );
     }
 
     // Getters...
@@ -38,5 +50,6 @@ public class ConfigCache {
     public static double getRainTorchMultiplier() { return rainTorchMultiplier; }
     public static double getRainCampfireMultiplier() { return rainCampfireMultiplier; }
     public static double getRainLanternMultiplier() { return rainLanternMultiplier; }
-    public static double getwaterLanternMultiplier() { return waterLanternMultiplier; }
+    public static double getWaterLanternMultiplier() { return waterLanternMultiplier; }
+    public static boolean isDynamicLightsEnabled() { return enableDynamicLights; }
 }

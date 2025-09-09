@@ -37,5 +37,7 @@
   "config.torchesbt.rainTorchMultiplier": "Multiplier for Torches",
   "config.torchesbt.rainCampfireMultiplier": "Multiplier for Campfires",
   "config.torchesbt.rainLanternMultiplier": "Multiplier for Lanterns",
-  "config.torchesbt.waterLanternMultiplier": "Multiplier for submerged Lanterns"
+  "config.torchesbt.waterLanternMultiplier": "Multiplier for submerged Lanterns",
+  "config.torchesbt.enableDynamicLights": "Enable DynamicLights",
+  "config.torchesbt.enableDynamicLights.tooltip": "Enable dynamic lighting support (ignores whether a mod is installed). Default: false"
 }

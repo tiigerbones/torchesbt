@@ -8,6 +8,10 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "torchesbt")
 public class RealisticTorchesBTConfig implements ConfigData {
+    @Comment("Enable dynamic lighting support (ignores whether a mod is installed). Default: false")
+    @ConfigEntry.Gui.PrefixText
+    public boolean enableDynamicLights = false;
+
     @Comment("Burn time for torches. Default: 40 Max: 3600")
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)

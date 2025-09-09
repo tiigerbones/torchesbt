@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
-import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightingModLoaded;
+import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightsEnabled;
 
 /**
  * Manages burn time ticking and state changes for burnable blocks and items.
@@ -61,7 +61,7 @@ public class BurnTimeManager {
             ItemStack tickStack = stack;
 
             // Only split stack if Dynamic Lighting mod is loaded
-            if (isDynamicLightingModLoaded() && stack.getCount() > 1) {
+            if (isDynamicLightsEnabled() && stack.getCount() > 1) {
                 tickStack = BurnTimeUtils.splitAndInitializeStack(stack, 1);
                 player.setStackInHand(hand, tickStack);
 
@@ -80,7 +80,7 @@ public class BurnTimeManager {
             }
 
             // Handle burn time ticking only with dynamic lighting
-            if (isDynamicLightingModLoaded()) {
+            if (isDynamicLightsEnabled()) {
                 // Lanterns in water
                 if (player.isSubmergedIn(FluidTags.WATER) && tickStack.getItem() == Items.LANTERN) {
                     long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(tickStack);
@@ -88,7 +88,7 @@ public class BurnTimeManager {
                         replaceBurnableItem(player, hand, tickStack);
                         continue;
                     }
-                    double multiplier = ConfigCache.getwaterLanternMultiplier();
+                    double multiplier = ConfigCache.getWaterLanternMultiplier();
                     long reduction = (long) Math.ceil(multiplier);
                     BurnTimeUtils.setCurrentBurnTime(tickStack, currentBurnTime - reduction);
                     continue;
@@ -145,7 +145,7 @@ public class BurnTimeManager {
                             replaceBurnableBlock(world, pos, block);
                             continue;
                         }
-                        double multiplier = ConfigCache.getwaterLanternMultiplier();
+                        double multiplier = ConfigCache.getWaterLanternMultiplier();
                         long reduction = (long) Math.ceil(multiplier);
                         burnable.setRemainingBurnTime(currentBurnTime - reduction);
                         entity.markDirty();
@@ -173,14 +173,14 @@ public class BurnTimeManager {
                     ItemStack newStack = new ItemStack(RegistryHandler.UNLIT_TORCH, stack.getCount());
                     itemEntity.setStack(newStack);
                     continue;
-                } else if (stack.getItem() == Items.LANTERN && isDynamicLightingModLoaded()) {
+                } else if (stack.getItem() == Items.LANTERN && isDynamicLightsEnabled()) {
                     long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(stack);
                     if (currentBurnTime <= 0) {
                         ItemStack newStack = new ItemStack(RegistryHandler.UNLIT_LANTERN, stack.getCount());
                         itemEntity.setStack(newStack);
                         continue;
                     }
-                    double multiplier = ConfigCache.getwaterLanternMultiplier();
+                    double multiplier = ConfigCache.getWaterLanternMultiplier();
                     long reduction = (long) Math.ceil(multiplier);
                     BurnTimeUtils.setCurrentBurnTime(stack, currentBurnTime - reduction);
                     itemEntity.setStack(stack);
@@ -189,7 +189,7 @@ public class BurnTimeManager {
             }
 
             // Only tick burn time for dropped items with dynamic lighting
-            if (isDynamicLightingModLoaded()) {
+            if (isDynamicLightsEnabled()) {
                 long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(stack);
                 if (currentBurnTime <= 0) {
                     ItemStack newStack = null;
@@ -262,7 +262,7 @@ public class BurnTimeManager {
             return;
         }
 
-        BlockState newState = null;
+        BlockState newState;
         if (block == Blocks.TORCH) {
             newState = RegistryHandler.UNLIT_TORCH_BLOCK.getDefaultState();
         } else if (block == Blocks.WALL_TORCH) {
