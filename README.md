@@ -30,7 +30,7 @@ Realistic Torches BT makes fire-based light sources behave more dynamically and 
 
 - **NOTES**:
   - Very early alpha — incompatibilities with other mods that modify torches, lanterns, or campfires are expected.
-  - Gonna expand on this mod by adding compat to other mods slowly and adding new mechanics to keep torches, lanterns and campfires lit longer/indefinite
+  - Gonna expand on this mod by slowly adding compat to other mods and adding new mechanics to keep torches, lanterns and campfires lit longer/indefinite
 
 ## Dependencies
 
