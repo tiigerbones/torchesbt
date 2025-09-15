@@ -7,6 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -43,7 +45,10 @@ public class UnlitCampFireItem extends Item {
         if (!world.isClient) {
             world.setBlockState(placePos, state, 3);
 
-            if (player != null && !player.isCreative()) {
+            assert player != null;
+            player.playSound(SoundEvents.BLOCK_WOOD_PLACE, SoundCategory.BLOCKS, 1, 1);
+
+            if (!player.isCreative()) {
                 context.getStack().decrement(1);
             }
         }
