@@ -1,12 +1,12 @@
 package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
-import com.enchantedwisp.torchesbt.burn.Burnable;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -29,35 +29,26 @@ public class BlockMixin {
         if (world.isClient) return;
 
         Block block = state.getBlock();
-        if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.LANTERN) {
-            if (blockEntity != null) {
-                long remainingBurnTime = BurnTimeUtils.getCurrentBurnTime(blockEntity);
-                RealisticTorchesBT.LOGGER.debug("Block broken at {} with remaining burn time: {}", pos, remainingBurnTime);
+        if (BurnableRegistry.isBurnableBlock(block) && BurnableRegistry.hasBlockEntity(block)) {
+            if (blockEntity == null) return;
 
-                // Custom drop logic
-                ItemStack drop = null;
-                if (remainingBurnTime > 0) {
-                    // Drop lit item with remaining burn time
-                    if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
-                        drop = new ItemStack(Blocks.TORCH.asItem());
-                    } else {
-                        drop = new ItemStack(Blocks.LANTERN.asItem());
-                    }
-                    BurnTimeUtils.setCurrentBurnTime(drop, remainingBurnTime);
-                } else {
-                    // Drop unlit variant
-                    if (block == Blocks.TORCH || block == Blocks.WALL_TORCH) {
-                        drop = new ItemStack(com.enchantedwisp.torchesbt.registry.RegistryHandler.UNLIT_TORCH);
-                    } else {
-                        drop = new ItemStack(com.enchantedwisp.torchesbt.registry.RegistryHandler.UNLIT_LANTERN);
-                    }
-                }
-                Block.dropStack(world, pos, drop);
-                RealisticTorchesBT.LOGGER.debug("Dropped item {} at {} with burn time {}", drop.getItem(), pos, remainingBurnTime);
+            long remainingBurnTime = BurnTimeUtils.getCurrentBurnTime(blockEntity);
+            RealisticTorchesBT.LOGGER.debug("Block broken at {} with remaining burn time: {}", pos, remainingBurnTime);
 
-                // Cancel default drop behavior to avoid duplicates
-                ci.cancel();
+            // Custom drop logic
+            ItemStack drop;
+            if (remainingBurnTime > 0) {
+                // Drop lit item with remaining burn time
+                drop = new ItemStack(block.asItem());
+                BurnTimeUtils.setCurrentBurnTime(drop, remainingBurnTime);
+            } else {
+                // Drop unlit variant
+                Item unlitItem = BurnableRegistry.getUnlitItem(block.asItem());
+                drop = new ItemStack(unlitItem != null ? unlitItem : block.asItem());
             }
+            Block.dropStack(world, pos, drop);
+            RealisticTorchesBT.LOGGER.debug("Dropped item {} at {} with burn time {}", drop.getItem(), pos, remainingBurnTime);
+            ci.cancel();
         }
     }
 }

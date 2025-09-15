@@ -5,6 +5,7 @@ import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.integration.DynamicLightManager;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.util.*;
@@ -47,6 +48,12 @@ public class RealisticTorchesBT implements ModInitializer {
             configHolder = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class);
         }
 
+        // Initialize ConfigCache
+        ConfigCache.initialize();
+
+        // Register BurnableRegistry
+        BurnableRegistry.register();
+
         // Register Particle
         Particles.register();
 
@@ -65,7 +72,5 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Initialize dynamic light support check
         DynamicLightManager.init();
-
-        ConfigCache.initialize();
     }
 }

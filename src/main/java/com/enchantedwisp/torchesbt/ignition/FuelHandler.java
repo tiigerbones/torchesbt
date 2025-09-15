@@ -3,8 +3,10 @@ package com.enchantedwisp.torchesbt.ignition;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -26,7 +28,7 @@ public class FuelHandler {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
 
     /**
-     * Registers fueling logic for campfires and lanterns.
+     * Registers fueling logic for burnable blocks.
      * Triggered when a player right-clicks with a fuel item.
      */
     public static void register() {
@@ -37,52 +39,36 @@ public class FuelHandler {
             BlockPos pos = hitResult.getBlockPos();
             Identifier itemId = Registries.ITEM.getId(stack.getItem());
             BlockEntity entity = world.getBlockEntity(pos);
+            Block block = world.getBlockState(pos).getBlock();
 
-            // Campfire fueling
-            if (JsonLoader.CAMPFIRE_FUELS.containsKey(itemId)
-                    && world.getBlockState(pos).getBlock() == Blocks.CAMPFIRE
-                    && world.getBlockState(pos).get(CampfireBlock.LIT)) {
-                if (entity instanceof ICampfireBurnAccessor accessor) {
-                    long current = accessor.torchesbt_getBurnTime();
-                    long added = JsonLoader.CAMPFIRE_FUELS.get(itemId) * 20L;
-                    accessor.torchesbt_setBurnTime(current + added);
+            // Fueling for burnable blocks
+            if (BurnableRegistry.isBurnableBlock(block)) {
+                boolean isCampfire = block == Blocks.CAMPFIRE;
+                boolean isLit = isCampfire ? world.getBlockState(pos).get(CampfireBlock.LIT) : true;
+
+                if (isLit && ((isCampfire && JsonLoader.CAMPFIRE_FUELS.containsKey(itemId)) ||
+                        (!isCampfire && JsonLoader.LANTERN_FUELS.containsKey(itemId)))) {
+                    long current = 0;
+                    long added = (isCampfire ? JsonLoader.CAMPFIRE_FUELS.get(itemId) : JsonLoader.LANTERN_FUELS.get(itemId)) * 20L;
+
+                    if (entity instanceof Burnable burnable) {
+                        current = burnable.getRemainingBurnTime();
+                        burnable.setRemainingBurnTime(current + added);
+                    } else if (entity instanceof ICampfireBurnAccessor accessor) {
+                        current = accessor.torchesbt_getBurnTime();
+                        accessor.torchesbt_setBurnTime(current + added);
+                        entity.markDirty();
+                    } else {
+                        return ActionResult.PASS;
+                    }
 
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
                     ReignitionHandler.consumeFuel(stack, player, hand);
-                    LOGGER.debug("Fueled campfire at {} by {} using {}, {} -> {}", pos, player.getName().getString(), stack.getItem(), current, current + added);
+                    LOGGER.debug("Fueled block {} at {} by {} using {}, {} -> {}", block, pos, player.getName().getString(), stack.getItem(), current, current + added);
                     return ActionResult.SUCCESS;
                 }
             }
 
-            // Lantern fueling
-            if (JsonLoader.LANTERN_FUELS.containsKey(itemId)
-                    && world.getBlockState(pos).getBlock() == Blocks.LANTERN) {
-                if (entity instanceof Burnable burnable) {
-                    long current = burnable.getRemainingBurnTime();
-                    long added = JsonLoader.LANTERN_FUELS.get(itemId) * 20L;
-                    burnable.setRemainingBurnTime(current + added);
-
-                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
-                    ReignitionHandler.consumeFuel(stack, player, hand);
-                    LOGGER.debug("Fueled lantern at {} by {} using {}, {} -> {}", pos, player.getName().getString(), stack.getItem(), current, current + added);
-                    return ActionResult.SUCCESS;
-                }
-            }
-
-            // Torch fueling
-            if (JsonLoader.TORCH_FUELS.containsKey(itemId)
-                    && (world.getBlockState(pos).getBlock() == Blocks.TORCH || world.getBlockState(pos).getBlock() == Blocks.WALL_TORCH)) {
-                if (entity instanceof Burnable burnable) {
-                    long current = burnable.getRemainingBurnTime();
-                    long added = JsonLoader.TORCH_FUELS.get(itemId) * 20L;
-                    burnable.setRemainingBurnTime(current + added);
-
-                    world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
-                    ReignitionHandler.consumeFuel(stack, player, hand);
-                    LOGGER.debug("Fueled lantern at {} by {} using {}, {} -> {}", pos, player.getName().getString(), stack.getItem(), current, current + added);
-                    return ActionResult.SUCCESS;
-                }
-            }
             return ActionResult.PASS;
         });
     }

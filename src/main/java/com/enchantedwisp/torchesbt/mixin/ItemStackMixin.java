@@ -1,9 +1,8 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -15,7 +14,7 @@ public class ItemStackMixin {
     @Inject(method = "isItemBarVisible", at = @At("HEAD"), cancellable = true)
     private void isItemBarVisible(CallbackInfoReturnable<Boolean> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             long max = BurnTimeUtils.getMaxBurnTime(stack);
             long current = BurnTimeUtils.getCurrentBurnTime(stack);
             cir.setReturnValue(current > 0 && current < max);
@@ -25,7 +24,7 @@ public class ItemStackMixin {
     @Inject(method = "getMaxDamage", at = @At("HEAD"), cancellable = true)
     private void getMaxDamage(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             cir.setReturnValue((int) BurnTimeUtils.getMaxBurnTime(stack));
         }
     }
@@ -33,7 +32,7 @@ public class ItemStackMixin {
     @Inject(method = "getDamage", at = @At("HEAD"), cancellable = true)
     private void getDamage(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             long max = BurnTimeUtils.getMaxBurnTime(stack);
             long current = BurnTimeUtils.getCurrentBurnTime(stack);
             cir.setReturnValue((int) (max - current));
@@ -43,7 +42,7 @@ public class ItemStackMixin {
     @Inject(method = "getItemBarColor", at = @At("HEAD"), cancellable = true)
     private void getItemBarColor(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             cir.setReturnValue(0xFFA500); // Orange
         }
     }
@@ -51,7 +50,7 @@ public class ItemStackMixin {
     @Inject(method = "getItemBarStep", at = @At("HEAD"), cancellable = true)
     private void getItemBarStep(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             long max = BurnTimeUtils.getMaxBurnTime(stack);
             long current = BurnTimeUtils.getCurrentBurnTime(stack);
             cir.setReturnValue((int) (13.0 * current / max));
@@ -61,7 +60,7 @@ public class ItemStackMixin {
     @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
     private void getMaxCount(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if ((stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) && stack.hasNbt()) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem()) && stack.hasNbt()) {
             assert stack.getNbt() != null;
             if (stack.getNbt().contains("remaining_burn")) {
                 cir.setReturnValue(1); // Prevent stacking if the item has burn time

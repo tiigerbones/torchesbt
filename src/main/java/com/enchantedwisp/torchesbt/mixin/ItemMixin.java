@@ -1,11 +1,10 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,7 +19,7 @@ public class ItemMixin {
 
     @Inject(method = "appendTooltip", at = @At("TAIL"))
     private void appendBurnTimeTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context, CallbackInfo ci) {
-        if (stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
             long current = BurnTimeUtils.getCurrentBurnTime(stack);
             long max = BurnTimeUtils.getMaxBurnTime(stack);
             tooltip.add(Text.literal("Burn Time: " + (current / 20) + "/" + (max / 20)));

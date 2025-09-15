@@ -3,8 +3,9 @@ package com.enchantedwisp.torchesbt.integration;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
-import com.enchantedwisp.torchesbt.util.ConfigCache;
+import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.text.Text;
@@ -13,7 +14,7 @@ import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 
 /**
- * Integration with Jade to display burn time tooltips for burnable blocks.
+ * Integration with Jade to display live burn time tooltips for burnable blocks.
  */
 public class JadePlugin implements IWailaPlugin {
 
@@ -23,29 +24,43 @@ public class JadePlugin implements IWailaPlugin {
 
             @Override
             public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-                // Only show for burnable blocks
-                if (accessor.getBlock() == Blocks.TORCH ||
-                        accessor.getBlock() == Blocks.WALL_TORCH ||
-                        accessor.getBlock() == Blocks.LANTERN ||
-                        (accessor.getBlock() == Blocks.CAMPFIRE &&
-                                accessor.getBlockState().get(net.minecraft.block.CampfireBlock.LIT))) {
+                Block block = accessor.getBlock();
+                BlockEntity entity = accessor.getBlockEntity();
 
-                    long burnTime = BurnTimeUtils.getCurrentBurnTime(accessor.getBlockEntity());
-                    long maxBurnTime = getMaxBurnTime(accessor.getBlock(), accessor.getBlockEntity());
+                // Skip if not burnable
+                if (!BurnableRegistry.isBurnableBlock(block)) return;
 
-                    if (burnTime > 0 && maxBurnTime > 0) {
-                        tooltip.add(Text.literal("Burn Time: " + (burnTime / 20) + "/" + (maxBurnTime / 20)));
-                    }
+                // For campfires, only show if lit
+                if (block == Blocks.CAMPFIRE && !accessor.getBlockState().get(net.minecraft.block.CampfireBlock.LIT)) return;
+
+                long burnTime = getCurrentBurnTime(block, entity);
+                long maxBurnTime = getMaxBurnTime(block, entity);
+
+                if (burnTime > 0 && maxBurnTime > 0) {
+                    tooltip.add(Text.literal("Burn Time: " + (burnTime / 20) + "/" + (maxBurnTime / 20)));
                 }
             }
 
-            private long getMaxBurnTime(net.minecraft.block.Block block, BlockEntity entity) {
+            private long getCurrentBurnTime(Block block, BlockEntity entity) {
                 if (entity instanceof Burnable burnable) {
-                    return burnable.getMaxBurnTime();
-                } else if (block == Blocks.CAMPFIRE) {
-                    return ConfigCache.getCampfireBurnTime();
+                    return burnable.getRemainingBurnTime();
+                } else if (entity instanceof ICampfireBurnAccessor campfire) {
+                    return campfire.torchesbt_getBurnTime();
+                } else if (BurnableRegistry.isBurnableBlock(block)) {
+                    // fallback for blocks without an entity
+                    return BurnableRegistry.getBurnTime(block);
                 }
                 return 0;
+            }
+
+            private long getMaxBurnTime(Block block, BlockEntity entity) {
+                if (entity instanceof Burnable burnable) {
+                    return burnable.getMaxBurnTime();
+                } else if (entity instanceof ICampfireBurnAccessor campfire) {
+                    return BurnableRegistry.getBurnTime(block);
+                } else {
+                    return BurnableRegistry.getBurnTime(block);
+                }
             }
 
             @Override
@@ -53,6 +68,6 @@ public class JadePlugin implements IWailaPlugin {
                 return new Identifier(RealisticTorchesBT.MOD_ID, "burn_time");
             }
 
-        }, net.minecraft.block.Block.class);
+        }, Block.class);
     }
 }

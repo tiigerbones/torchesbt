@@ -2,7 +2,7 @@ package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
-import com.enchantedwisp.torchesbt.util.ConfigCache;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
@@ -30,7 +30,7 @@ public abstract class TorchBlockMixin extends Block implements BlockEntityProvid
         super.onPlaced(world, pos, state, placer, itemStack);
         BlockEntity entity = world.getBlockEntity(pos);
         if (entity instanceof TorchBlockEntity) {
-            BurnTimeManager.setBurnTimeOnPlacement(world, pos, entity, itemStack, ConfigCache.getTorchBurnTime());
+            BurnTimeManager.setBurnTimeOnPlacement(world, pos, entity, itemStack, BurnableRegistry.getBurnTime(state.getBlock()));
         }
     }
 }

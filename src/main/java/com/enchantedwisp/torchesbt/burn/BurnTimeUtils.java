@@ -1,14 +1,10 @@
 package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LanternBlock;
-import net.minecraft.block.WallTorchBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -23,15 +19,11 @@ public class BurnTimeUtils {
     public static final String BURN_TIME_KEY = "remaining_burn";
 
     public static long getMaxBurnTime(ItemStack stack) {
-        if (stack.getItem() == Items.TORCH) return ConfigCache.getTorchBurnTime();
-        if (stack.getItem() == Items.LANTERN) return ConfigCache.getLanternBurnTime();
-        return 0;
+        return BurnableRegistry.getBurnTime(stack.getItem());
     }
 
     public static double getRainMultiplier(net.minecraft.item.Item item) {
-        if (item == Items.TORCH) return ConfigCache.getRainTorchMultiplier();
-        if (item == Items.LANTERN) return ConfigCache.getRainLanternMultiplier();
-        return 1.0;
+        return BurnableRegistry.getRainMultiplier(item);
     }
 
     public static long getCurrentBurnTime(ItemStack stack) {
@@ -88,6 +80,6 @@ public class BurnTimeUtils {
     }
 
     public static boolean isBurnableItem(ItemStack stack) {
-        return stack.getItem() == Items.TORCH || stack.getItem() == Items.LANTERN;
+        return BurnableRegistry.isBurnableItem(stack.getItem());
     }
 }

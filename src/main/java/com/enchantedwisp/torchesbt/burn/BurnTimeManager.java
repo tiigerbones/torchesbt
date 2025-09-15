@@ -1,19 +1,14 @@
 package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.blockentity.LanternBlockEntity;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.RegistryHandler;
-import com.enchantedwisp.torchesbt.util.ConfigCache;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
@@ -23,12 +18,13 @@ import net.minecraft.world.World;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightsEnabled;
 
 /**
- * Manages burn time ticking and state changes for burnable blocks and items.
- * Uses the Burnable interface for standardized handling.
+ * Handles burn time ticking for player-held items, nearby dropped items, and burnable blocks.
+ * Only ticks items when Dynamic Lights is enabled.
  */
 public class BurnTimeManager {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
@@ -41,7 +37,7 @@ public class BurnTimeManager {
             if (server.getTicks() % ITEM_UPDATE_INTERVAL != 0) return;
 
             for (PlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                processPlayerBurnTimes(player);
+                processPlayerItems(player);
                 processNearbyBurnables(player);
             }
         });
@@ -49,254 +45,124 @@ public class BurnTimeManager {
         LOGGER.info("Registered burn time tick handler");
     }
 
-    // --- Player-held items ---
-    private static void processPlayerBurnTimes(PlayerEntity player) {
-        World world = player.getWorld();
-        if (world.isClient) return;
+    // --- Tick player-held items ---
+    private static void processPlayerItems(PlayerEntity player) {
+        if (player.getWorld().isClient) return;
 
         for (Hand hand : Hand.values()) {
             ItemStack stack = player.getStackInHand(hand);
-            if (!BurnTimeUtils.isBurnableItem(stack)) continue;
+            if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
 
-            ItemStack tickStack = stack;
+            if (!isDynamicLightsEnabled()) continue;
 
-            // Only split stack if Dynamic Lighting mod is loaded
-            if (isDynamicLightsEnabled() && stack.getCount() > 1) {
-                tickStack = BurnTimeUtils.splitAndInitializeStack(stack, 1);
-                player.setStackInHand(hand, tickStack);
-
-                ItemStack remainingStack = stack.copy();
-                remainingStack.setCount(stack.getCount());
-                if (!player.getInventory().insertStack(remainingStack)) {
-                    ItemEntity itemEntity = new ItemEntity(world, player.getX(), player.getY(), player.getZ(), remainingStack);
-                    world.spawnEntity(itemEntity);
-                }
-            }
-
-            // Handle torches in water (always extinguish)
-            if (player.isSubmergedIn(FluidTags.WATER) && tickStack.getItem() == Items.TORCH) {
-                replaceBurnableItem(player, hand, tickStack);
+            long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
+            if (burnTime <= 0) {
+                extinguishPlayerItem(player, hand, stack);
                 continue;
             }
 
-            // Handle burn time ticking only with dynamic lighting
-            if (isDynamicLightsEnabled()) {
-                // Lanterns in water
-                if (player.isSubmergedIn(FluidTags.WATER) && tickStack.getItem() == Items.LANTERN) {
-                    long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(tickStack);
-                    if (currentBurnTime <= 0) {
-                        replaceBurnableItem(player, hand, tickStack);
-                        continue;
-                    }
-                    double multiplier = ConfigCache.getWaterLanternMultiplier();
-                    long reduction = (long) Math.ceil(multiplier);
-                    BurnTimeUtils.setCurrentBurnTime(tickStack, currentBurnTime - reduction);
-                    continue;
-                }
+            double multiplier = BurnTimeUtils.isActuallyRainingAt(player.getWorld(), player.getBlockPos())
+                    ? BurnableRegistry.getRainMultiplier(stack.getItem())
+                    : 1.0;
+            burnTime -= (long) Math.ceil(multiplier);
+            BurnTimeUtils.setCurrentBurnTime(stack, burnTime);
 
-                long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(tickStack);
-                if (currentBurnTime <= 0) {
-                    replaceBurnableItem(player, hand, tickStack);
-                    continue;
-                }
-
-                double multiplier = BurnTimeUtils.isActuallyRainingAt(world, player.getBlockPos())
-                        ? BurnTimeUtils.getRainMultiplier(tickStack.getItem())
-                        : 1.0;
-                long reduction = (long) Math.ceil(multiplier);
-                BurnTimeUtils.setCurrentBurnTime(tickStack, currentBurnTime - reduction);
+            if (burnTime <= 0) {
+                extinguishPlayerItem(player, hand, stack);
             }
         }
     }
 
-    // --- Nearby blocks and items ---
+    private static void extinguishPlayerItem(PlayerEntity player, Hand hand, ItemStack stack) {
+        ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
+        player.setStackInHand(hand, unlit);
+        player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 0.5f, 1.0f);
+        LOGGER.debug("Extinguished player-held item {} for {}", stack.getItem(), player.getName().getString());
+    }
+
+    // --- Tick nearby burnables ---
     private static void processNearbyBurnables(PlayerEntity player) {
         World world = player.getWorld();
         if (world.isClient) return;
 
-        BlockPos playerPos = player.getBlockPos();
-        Box scanBox = new Box(playerPos).expand(SCAN_RADIUS, SCAN_VERTICAL, SCAN_RADIUS);
+        BlockPos pos = player.getBlockPos();
+        Box scanBox = new Box(pos).expand(SCAN_RADIUS, SCAN_VERTICAL, SCAN_RADIUS);
 
-        // Process blocks
-        for (BlockPos pos : BlockPos.iterate(
-                new BlockPos((int) scanBox.minX, (int) scanBox.minY, (int) scanBox.minZ),
-                new BlockPos((int) scanBox.maxX, (int) scanBox.maxY, (int) scanBox.maxZ))) {
-            BlockState state = world.getBlockState(pos);
+        // Blocks
+        for (BlockPos blockPos : BlockPos.iterate(pos.add(-SCAN_RADIUS, -SCAN_VERTICAL, -SCAN_RADIUS),
+                pos.add(SCAN_RADIUS, SCAN_VERTICAL, SCAN_RADIUS))) {
+            BlockState state = world.getBlockState(blockPos);
             Block block = state.getBlock();
-
-            // Skip unlit blocks to prevent unnecessary processing
-            if (block == RegistryHandler.UNLIT_TORCH_BLOCK ||
-                    block == RegistryHandler.UNLIT_WALL_TORCH_BLOCK ||
-                    block == RegistryHandler.UNLIT_LANTERN_BLOCK) {
-                continue;
-            }
-
-            // Check for water submersion
-            FluidState fluidState = world.getFluidState(pos);
-            if (fluidState.isIn(FluidTags.WATER)) {
-                if (block == Blocks.TORCH || block == Blocks.WALL_TORCH || block == Blocks.CAMPFIRE) {
-                    replaceBurnableBlock(world, pos, block);
-                    continue;
-                } else if (block == Blocks.LANTERN) {
-                    BlockEntity entity = world.getBlockEntity(pos);
-                    if (entity instanceof LanternBlockEntity burnable) {
-                        long currentBurnTime = burnable.getRemainingBurnTime();
-                        if (currentBurnTime <= 0) {
-                            replaceBurnableBlock(world, pos, block);
-                            continue;
-                        }
-                        double multiplier = ConfigCache.getWaterLanternMultiplier();
-                        long reduction = (long) Math.ceil(multiplier);
-                        burnable.setRemainingBurnTime(currentBurnTime - reduction);
-                        entity.markDirty();
-                    }
-                    continue;
-                }
-            }
-
-            BlockEntity entity = world.getBlockEntity(pos);
+            BlockEntity entity = world.getBlockEntity(blockPos);
 
             if (entity instanceof Burnable burnable) {
-                tickBurnableBlock(world, pos, state, block, burnable);
-            } else if (block == Blocks.CAMPFIRE && state.get(CampfireBlock.LIT)) {
-                tickCampfire(world, pos, state);
+                tickBurnableBlock(world, blockPos, state, block, burnable);
+            } else if (entity instanceof ICampfireBurnAccessor campfire) {
+                tickCampfire(world, blockPos, state, campfire);
             }
         }
 
-        // Process dropped items
-        List<ItemEntity> itemEntities = world.getEntitiesByClass(ItemEntity.class, scanBox, entity -> BurnTimeUtils.isBurnableItem(entity.getStack()));
-        for (ItemEntity itemEntity : itemEntities) {
+        // Dropped items
+        List<ItemEntity> items = world.getEntitiesByClass(ItemEntity.class, scanBox, e -> BurnableRegistry.isBurnableItem(e.getStack().getItem()));
+        for (ItemEntity itemEntity : items) {
+            if (!isDynamicLightsEnabled()) continue;
+
             ItemStack stack = itemEntity.getStack();
-            FluidState fluidState = world.getFluidState(itemEntity.getBlockPos());
-            if (fluidState.isIn(FluidTags.WATER)) {
-                if (stack.getItem() == Items.TORCH) {
-                    ItemStack newStack = new ItemStack(RegistryHandler.UNLIT_TORCH, stack.getCount());
-                    itemEntity.setStack(newStack);
-                    continue;
-                } else if (stack.getItem() == Items.LANTERN && isDynamicLightsEnabled()) {
-                    long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(stack);
-                    if (currentBurnTime <= 0) {
-                        ItemStack newStack = new ItemStack(RegistryHandler.UNLIT_LANTERN, stack.getCount());
-                        itemEntity.setStack(newStack);
-                        continue;
-                    }
-                    double multiplier = ConfigCache.getWaterLanternMultiplier();
-                    long reduction = (long) Math.ceil(multiplier);
-                    BurnTimeUtils.setCurrentBurnTime(stack, currentBurnTime - reduction);
-                    itemEntity.setStack(stack);
-                    continue;
-                }
+            long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
+            if (burnTime <= 0) {
+                ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
+                itemEntity.setStack(unlit);
+                continue;
             }
 
-            // Only tick burn time for dropped items with dynamic lighting
-            if (isDynamicLightsEnabled()) {
-                long currentBurnTime = BurnTimeUtils.getCurrentBurnTime(stack);
-                if (currentBurnTime <= 0) {
-                    ItemStack newStack = null;
-                    if (stack.getItem() == Items.TORCH) {
-                        newStack = new ItemStack(RegistryHandler.UNLIT_TORCH, stack.getCount());
-                    } else if (stack.getItem() == Items.LANTERN) {
-                        newStack = new ItemStack(RegistryHandler.UNLIT_LANTERN, stack.getCount());
-                    }
-                    if (newStack != null) {
-                        itemEntity.setStack(newStack);
-                    }
-                    continue;
-                }
-
-                double multiplier = BurnTimeUtils.isActuallyRainingAt(world, itemEntity.getBlockPos()) ? BurnTimeUtils.getRainMultiplier(stack.getItem()) : 1.0;
-                long reduction = (long) Math.ceil(multiplier);
-                BurnTimeUtils.setCurrentBurnTime(stack, currentBurnTime - reduction);
-                itemEntity.setStack(stack);
-            }
+            double multiplier = BurnTimeUtils.isActuallyRainingAt(world, itemEntity.getBlockPos())
+                    ? BurnableRegistry.getRainMultiplier(stack.getItem())
+                    : 1.0;
+            BurnTimeUtils.setCurrentBurnTime(stack, burnTime - (long) Math.ceil(multiplier));
+            itemEntity.setStack(stack);
         }
     }
 
     private static void tickBurnableBlock(World world, BlockPos pos, BlockState state, Block block, Burnable burnable) {
-        // Only process lit blocks
-        if (block != Blocks.TORCH && block != Blocks.WALL_TORCH && block != Blocks.LANTERN) {
+        long burnTime = burnable.getRemainingBurnTime();
+        if (burnTime <= 0) {
+            Block unlit = BurnableRegistry.getUnlitBlock(block);
+            if (unlit != null) world.setBlockState(pos, unlit.getDefaultState(), 3);
             return;
         }
-
-        long currentBurnTime = burnable.getRemainingBurnTime();
-        if (currentBurnTime <= 0) {
-            replaceBurnableBlock(world, pos, block);
-            return;
-        }
-
         burnable.tickBurn(world, true);
     }
 
-    private static void tickCampfire(World world, BlockPos pos, BlockState state) {
-        BlockEntity entity = world.getBlockEntity(pos);
-        if (!(entity instanceof ICampfireBurnAccessor accessor)) return;
+    private static void tickCampfire(World world, BlockPos pos, BlockState state, ICampfireBurnAccessor campfire) {
+        long burnTime = campfire.torchesbt_getBurnTime();
 
-        long currentBurnTime = accessor.torchesbt_getBurnTime();
-
-        if (currentBurnTime <= 0) {
-            // Extinguish campfire
+        // Only extinguish if burnTime is 0 or less AND the campfire is currently lit
+        if (burnTime <= 0 && state.get(CampfireBlock.LIT)) {
             world.setBlockState(pos, state.with(CampfireBlock.LIT, false), 3);
-            world.playSound(null, pos,
-                    SoundEvents.ENTITY_GENERIC_EXTINGUISH_FIRE,
-                    SoundCategory.BLOCKS,
-                    1.0F, 1.0F);
             return;
         }
 
-    // Tick down
-    double multiplier = BurnTimeUtils.isActuallyRainingAt(world, pos)
-            ? ConfigCache.getRainCampfireMultiplier()
-            : 1.0;
-    long reduction = (long) Math.ceil(multiplier);
-    accessor.torchesbt_setBurnTime(currentBurnTime - reduction);
-
-    // Sync to client for real-time Jade tooltip updates
-    if (!world.isClient) {
-        world.updateListeners(pos, state, state, 3);
-    }
-}
-
-    private static void replaceBurnableBlock(World world, BlockPos pos, Block block) {
-        // Only replace lit blocks
-        if (block != Blocks.TORCH && block != Blocks.WALL_TORCH && block != Blocks.LANTERN) {
-            return;
-        }
-
-        BlockState newState;
-        if (block == Blocks.TORCH) {
-            newState = RegistryHandler.UNLIT_TORCH_BLOCK.getDefaultState();
-        } else if (block == Blocks.WALL_TORCH) {
-            newState = RegistryHandler.UNLIT_WALL_TORCH_BLOCK.getDefaultState().with(WallTorchBlock.FACING, world.getBlockState(pos).get(WallTorchBlock.FACING));
-        } else {
-            newState = RegistryHandler.UNLIT_LANTERN_BLOCK.getDefaultState().with(LanternBlock.HANGING, world.getBlockState(pos).get(LanternBlock.HANGING));
-        }
-
-        if (newState != null && newState.canPlaceAt(world, pos)) {
-            world.setBlockState(pos, newState, 3);
-        }
-    }
-
-    private static void replaceBurnableItem(PlayerEntity player, Hand hand, ItemStack stack) {
-        ItemStack newStack = null;
-        if (stack.getItem() == Items.TORCH) {
-            newStack = new ItemStack(RegistryHandler.UNLIT_TORCH, 1);
-        } else if (stack.getItem() == Items.LANTERN) {
-            newStack = new ItemStack(RegistryHandler.UNLIT_LANTERN, 1);
-        }
-
-        if (newStack != null) {
-            player.setStackInHand(hand, newStack);
+        // Only tick burn time if the campfire is still lit
+        if (burnTime > 0) {
+            double multiplier = BurnTimeUtils.isActuallyRainingAt(world, pos)
+                    ? BurnableRegistry.getRainMultiplier(Blocks.CAMPFIRE)
+                    : 1.0;
+            campfire.torchesbt_setBurnTime(burnTime - (long) Math.ceil(multiplier));
+            // Sync to client for real-time Jade tooltip updates
+            if (!world.isClient) {
+                world.updateListeners(pos, state, state, 3);
+            }
         }
     }
 
     public static void setBurnTimeOnPlacement(World world, BlockPos pos, BlockEntity entity, ItemStack stack, long defaultBurnTime) {
-        long burnTime = stack.hasNbt() && stack.getNbt() != null && stack.getNbt().contains(BurnTimeUtils.BURN_TIME_KEY)
-                ? stack.getNbt().getLong(BurnTimeUtils.BURN_TIME_KEY)
-                : defaultBurnTime;
+        long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
+        if (burnTime <= 0) burnTime = defaultBurnTime;
+
         if (entity instanceof Burnable burnable) {
             burnable.setRemainingBurnTime(burnTime);
-        } else if (entity instanceof ICampfireBurnAccessor accessor) {
-            accessor.torchesbt_setBurnTime(burnTime);
+        } else if (entity instanceof ICampfireBurnAccessor campfire) {
+            campfire.torchesbt_setBurnTime(burnTime);
         }
     }
 }

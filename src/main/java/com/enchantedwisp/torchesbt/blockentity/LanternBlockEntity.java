@@ -1,9 +1,8 @@
 package com.enchantedwisp.torchesbt.blockentity;
 
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
-import com.enchantedwisp.torchesbt.util.ConfigCache;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -26,7 +25,7 @@ public class LanternBlockEntity extends BlockEntity implements Burnable {
 
     @Override
     public long getMaxBurnTime() {
-        return ConfigCache.getLanternBurnTime();
+        return BurnableRegistry.getBurnTime(getCachedState().getBlock());
     }
 
     @Override
@@ -54,7 +53,7 @@ public class LanternBlockEntity extends BlockEntity implements Burnable {
 
     @Override
     public double getRainMultiplier() {
-        return ConfigCache.getRainLanternMultiplier();
+        return BurnableRegistry.getRainMultiplier(getCachedState().getBlock());
     }
 
     @Override
