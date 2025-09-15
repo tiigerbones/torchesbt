@@ -2,6 +2,7 @@ package com.enchantedwisp.torchesbt.registry;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
+import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
@@ -22,14 +23,33 @@ public class BurnableRegistry {
     private static final Map<Block, BurnableBlockEntry> BURNABLE_BLOCKS = new HashMap<>();
 
     /**
+     * Enum to represent the type of fuel used by a burnable block.
+     */
+    public enum FuelType {
+        CAMPFIRE_FUELS(JsonLoader.CAMPFIRE_FUELS),
+        LANTERN_FUELS(JsonLoader.LANTERN_FUELS),
+        TORCH_FUELS(JsonLoader.TORCH_FUELS);
+
+        private final Map<Identifier, Integer> fuelMap;
+
+        FuelType(Map<Identifier, Integer> fuelMap) {
+            this.fuelMap = fuelMap;
+        }
+
+        public Map<Identifier, Integer> getFuelMap() {
+            return fuelMap;
+        }
+    }
+
+    /**
      * Represents a burnable item with its properties.
      */
     public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {}
 
     /**
-     * Represents a burnable block with its properties.
+     * Represents a burnable block with its properties and fuel type.
      */
-    public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity) {}
+    public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {}
 
     public static void register() {
         // Register default burnable items and blocks
@@ -50,28 +70,32 @@ public class BurnableRegistry {
                 RegistryHandler.UNLIT_TORCH_BLOCK,
                 ConfigCache.getTorchBurnTime(),
                 ConfigCache.getRainTorchMultiplier(),
-                true
+                true,
+                FuelType.TORCH_FUELS
         );
         registerBurnableBlock(
                 Blocks.WALL_TORCH,
                 RegistryHandler.UNLIT_WALL_TORCH_BLOCK,
                 ConfigCache.getTorchBurnTime(),
                 ConfigCache.getRainTorchMultiplier(),
-                true
+                true,
+                FuelType.TORCH_FUELS
         );
         registerBurnableBlock(
                 Blocks.LANTERN,
                 RegistryHandler.UNLIT_LANTERN_BLOCK,
                 ConfigCache.getLanternBurnTime(),
                 ConfigCache.getRainLanternMultiplier(),
-                true
+                true,
+                FuelType.LANTERN_FUELS
         );
         registerBurnableBlock(
                 Blocks.CAMPFIRE,
                 Blocks.CAMPFIRE, // Unlit campfire uses same block with LIT=false
                 ConfigCache.getCampfireBurnTime(),
                 ConfigCache.getRainCampfireMultiplier(),
-                true
+                true,
+                FuelType.CAMPFIRE_FUELS
         );
         LOGGER.info("Registered {} burnable items and {} burnable blocks", BURNABLE_ITEMS.size(), BURNABLE_BLOCKS.size());
     }
@@ -81,9 +105,9 @@ public class BurnableRegistry {
         LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
     }
 
-    private static void registerBurnableBlock(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity) {
-        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, hasBlockEntity));
-        LOGGER.debug("Registered burnable block: {} (unlit: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
+    private static void registerBurnableBlock(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {
+        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, hasBlockEntity, fuelType));
+        LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock), fuelType);
     }
 
     public static boolean isBurnableItem(Item item) {
@@ -143,5 +167,10 @@ public class BurnableRegistry {
     public static boolean hasBlockEntity(Block block) {
         BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
         return entry != null && entry.hasBlockEntity();
+    }
+
+    public static FuelType getFuelType(Block block) {
+        BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
+        return entry != null ? entry.fuelType() : null;
     }
 }

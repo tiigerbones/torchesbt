@@ -19,10 +19,9 @@ import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 
 /**
- * Handles fueling of campfires and lanterns using defined fuel items.
+ * Handles fueling of burnable blocks using defined fuel items.
  *
- * <p>Fuels are defined in {@link JsonLoader#CAMPFIRE_FUELS} and
- * {@link JsonLoader#LANTERN_FUELS}.</p>
+ * <p>Fuels are defined in the fuel maps referenced by {@link BurnableRegistry.FuelType}.</p>
  */
 public class FuelHandler {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
@@ -45,11 +44,11 @@ public class FuelHandler {
             if (BurnableRegistry.isBurnableBlock(block)) {
                 boolean isCampfire = block == Blocks.CAMPFIRE;
                 boolean isLit = isCampfire ? world.getBlockState(pos).get(CampfireBlock.LIT) : true;
+                BurnableRegistry.FuelType fuelType = BurnableRegistry.getFuelType(block);
 
-                if (isLit && ((isCampfire && JsonLoader.CAMPFIRE_FUELS.containsKey(itemId)) ||
-                        (!isCampfire && JsonLoader.LANTERN_FUELS.containsKey(itemId)))) {
+                if (isLit && fuelType != null && fuelType.getFuelMap().containsKey(itemId)) {
                     long current = 0;
-                    long added = (isCampfire ? JsonLoader.CAMPFIRE_FUELS.get(itemId) : JsonLoader.LANTERN_FUELS.get(itemId)) * 20L;
+                    long added = fuelType.getFuelMap().get(itemId) * 20L;
 
                     if (entity instanceof Burnable burnable) {
                         current = burnable.getRemainingBurnTime();
