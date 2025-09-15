@@ -11,7 +11,7 @@
 		"homepage": "https://modrinth.com/mod/realistic-torchesbt",
 		"sources": "https://github.com/tiigerbones/torchesbt"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/torchesbt/icon.png",
 	"environment": "*",
 	"entrypoints": {
