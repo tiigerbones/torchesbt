@@ -137,7 +137,6 @@ public class BurnableRegistry {
             Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
             Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
             Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
-            if (litItem != Items.AIR && unlitItem != Items.AIR && litBlock != Blocks.AIR && unlitBlock != Blocks.AIR) {
                 registerBurnableItem(
                         litItem,
                         unlitItem,
@@ -158,11 +157,9 @@ public class BurnableRegistry {
                         Registries.BLOCK.getId(unlitBlock),
                         Registries.ITEM.getId(unlitItem)
                 );
-            } else {
                 LOGGER.warn("Failed to register Chipped lantern: {} (litItem: {}, unlitItem: {}, litBlock: {}, unlitBlock: {})",
                         variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
                         Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
-            }
         }
 
         // Chipped special lanterns
@@ -174,7 +171,6 @@ public class BurnableRegistry {
             Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
             Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
             Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
-            if (litItem != Items.AIR && unlitItem != Items.AIR && litBlock != Blocks.AIR && unlitBlock != Blocks.AIR) {
                 registerBurnableItem(
                         litItem,
                         unlitItem,
@@ -195,11 +191,6 @@ public class BurnableRegistry {
                         Registries.BLOCK.getId(unlitBlock),
                         Registries.ITEM.getId(unlitItem)
                 );
-            } else {
-                LOGGER.warn("Failed to register Chipped special lantern: {} (litItem: {}, unlitItem: {}, litBlock: {}, unlitBlock: {})",
-                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
-                        Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
-            }
         }
 
         // Chipped torches
@@ -214,8 +205,6 @@ public class BurnableRegistry {
             Block unlitTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_torch"));
             Block litWallTorchBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_wall_torch"));
             Block unlitWallTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_wall_torch"));
-            if (litItem != Items.AIR && unlitItem != Items.AIR && litTorchBlock != Blocks.AIR && unlitTorchBlock != Blocks.AIR &&
-                    litWallTorchBlock != Blocks.AIR && unlitWallTorchBlock != Blocks.AIR) {
                 registerBurnableItem(
                         litItem,
                         unlitItem,
@@ -245,12 +234,6 @@ public class BurnableRegistry {
                         Registries.BLOCK.getId(unlitWallTorchBlock),
                         Registries.ITEM.getId(unlitItem)
                 );
-            } else {
-                LOGGER.warn("Failed to register Chipped torch: {} (litItem: {}, unlitItem: {}, litTorch: {}, unlitTorch: {}, litWallTorch: {}, unlitWallTorch: {})",
-                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
-                        Registries.BLOCK.getId(litTorchBlock), Registries.BLOCK.getId(unlitTorchBlock),
-                        Registries.BLOCK.getId(litWallTorchBlock), Registries.BLOCK.getId(unlitWallTorchBlock));
-            }
         }
     }
 

@@ -21,6 +21,9 @@
 		"client": [
 			"com.enchantedwisp.torchesbt.client.RealisticTorchesBTClient"
 		],
+      "fabric-datagen": [
+        "com.enchantedwisp.torchesbt.RealisticTorchesBTDataGenerator"
+      ],
       "jade": [
         "com.enchantedwisp.torchesbt.integration.JadePlugin"
       ]
