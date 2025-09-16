@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt.registry;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import com.enchantedwisp.torchesbt.util.JsonLoader;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -133,6 +134,11 @@ public class BurnableRegistry {
                 true,
                 FuelType.CAMPFIRE_FUELS
         );
+
+        if (FabricLoader.getInstance().isModLoaded("chipped")) {
+            registerChippedBurnables();
+            RealisticTorchesBT.LOGGER.info("Chipped detected - Registering Chipped burnables");
+        }
     }
 
     public static void registerChippedBurnables() {
@@ -140,7 +146,6 @@ public class BurnableRegistry {
             LOGGER.info("Chipped mod not detected, skipping Chipped burnable registration");
             return;
         }
-        LOGGER.info("Chipped mod detected, registering Chipped burnables");
 
         // Chipped lanterns
         String[] chippedLanterns = {
