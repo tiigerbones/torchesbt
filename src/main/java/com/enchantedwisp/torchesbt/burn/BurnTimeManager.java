@@ -76,8 +76,7 @@ public class BurnTimeManager {
     private static void extinguishPlayerItem(PlayerEntity player, Hand hand, ItemStack stack) {
         ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
         player.setStackInHand(hand, unlit);
-        player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.BLOCK_FIRE_EXTINGUISH, SoundCategory.PLAYERS, 0.5f, 1.0f);
-        LOGGER.debug("Extinguished player-held item {} for {}", stack.getItem(), player.getName().getString());
+
     }
 
     // --- Tick nearby burnables ---

@@ -1,0 +1,6 @@
+{
+  "parent": "torchesbt:block/chipped/unlit_clear_lantern_hanging",
+  "textures": {
+    "lantern": "torchesbt:block/chipped/lantern/unlit_ender_lantern"
+  }
+}

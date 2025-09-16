@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt.registry;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import com.enchantedwisp.torchesbt.util.JsonLoader;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
@@ -10,6 +11,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
 import org.slf4j.Logger;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -97,15 +99,167 @@ public class BurnableRegistry {
                 true,
                 FuelType.CAMPFIRE_FUELS
         );
+
+        // Register Chipped burnables on server start to ensure Chipped's items/blocks are available
+        if (FabricLoader.getInstance().isModLoaded("chipped")) {
+            ServerLifecycleEvents.SERVER_STARTING.register(server -> registerChippedBurnables());
+        }
+
         LOGGER.info("Registered {} burnable items and {} burnable blocks", BURNABLE_ITEMS.size(), BURNABLE_BLOCKS.size());
     }
 
-    private static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {
+    public static void registerChippedBurnables() {
+        if (!FabricLoader.getInstance().isModLoaded("chipped")) {
+            LOGGER.info("Chipped mod not detected, skipping Chipped burnable registration");
+            return;
+        }
+        LOGGER.info("Chipped mod detected, registering Chipped burnables");
+
+        // Log all registered items and blocks in the 'chipped' namespace for debugging
+        LOGGER.debug("Registered items in 'chipped' namespace:");
+        Registries.ITEM.getIds().stream()
+                .filter(id -> id.getNamespace().equals("chipped"))
+                .forEach(id -> LOGGER.debug("Item: {}", id));
+        LOGGER.debug("Registered blocks in 'chipped' namespace:");
+        Registries.BLOCK.getIds().stream()
+                .filter(id -> id.getNamespace().equals("chipped"))
+                .forEach(id -> LOGGER.debug("Block: {}", id));
+
+        // Chipped lanterns
+        String[] chippedLanterns = {
+                "blue_paper", "burning_coal", "checkered_iron", "dark_blue_paper",
+                "ender", "green_paper", "iron_bowl", "purple_paper",
+                "red_paper", "small_green", "white_paper", "wooden_cage",
+                "wrought_iron", "yellow_tube"
+        };
+        for (String variant : chippedLanterns) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_lantern"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
+            Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            if (litItem != Items.AIR && unlitItem != Items.AIR && litBlock != Blocks.AIR && unlitBlock != Blocks.AIR) {
+                registerBurnableItem(
+                        litItem,
+                        unlitItem,
+                        ConfigCache.getLanternBurnTime(),
+                        ConfigCache.getRainLanternMultiplier()
+                );
+                registerBurnableBlock(
+                        litBlock,
+                        unlitBlock,
+                        ConfigCache.getLanternBurnTime(),
+                        ConfigCache.getRainLanternMultiplier(),
+                        true,
+                        FuelType.LANTERN_FUELS
+                );
+                LOGGER.debug(
+                        "Registered Chipped lantern: {} (unlit block: {}, unlit item: {})",
+                        variant,
+                        Registries.BLOCK.getId(unlitBlock),
+                        Registries.ITEM.getId(unlitItem)
+                );
+            } else {
+                LOGGER.warn("Failed to register Chipped lantern: {} (litItem: {}, unlitItem: {}, litBlock: {}, unlitBlock: {})",
+                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
+                        Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
+            }
+        }
+
+        // Chipped special lanterns
+        String[] specialLanterns = {
+                "big", "donut", "tall", "wide"
+        };
+        for (String variant : specialLanterns) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_lantern"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
+            Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            if (litItem != Items.AIR && unlitItem != Items.AIR && litBlock != Blocks.AIR && unlitBlock != Blocks.AIR) {
+                registerBurnableItem(
+                        litItem,
+                        unlitItem,
+                        ConfigCache.getLanternBurnTime(),
+                        ConfigCache.getRainLanternMultiplier()
+                );
+                registerBurnableBlock(
+                        litBlock,
+                        unlitBlock,
+                        ConfigCache.getLanternBurnTime(),
+                        ConfigCache.getRainLanternMultiplier(),
+                        true,
+                        FuelType.LANTERN_FUELS
+                );
+                LOGGER.debug(
+                        "Registered Chipped special lantern: {} (unlit block: {}, unlit item: {})",
+                        variant,
+                        Registries.BLOCK.getId(unlitBlock),
+                        Registries.ITEM.getId(unlitItem)
+                );
+            } else {
+                LOGGER.warn("Failed to register Chipped special lantern: {} (litItem: {}, unlitItem: {}, litBlock: {}, unlitBlock: {})",
+                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
+                        Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
+            }
+        }
+
+        // Chipped torches
+        String[] chippedTorches = {
+                "acacia", "birch", "crimson", "dark_oak",
+                "glow", "iron", "jungle", "spruce", "warped"
+        };
+        for (String variant : chippedTorches) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_torch"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_torch"));
+            Block litTorchBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_torch"));
+            Block unlitTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_torch"));
+            Block litWallTorchBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_wall_torch"));
+            Block unlitWallTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_wall_torch"));
+            if (litItem != Items.AIR && unlitItem != Items.AIR && litTorchBlock != Blocks.AIR && unlitTorchBlock != Blocks.AIR &&
+                    litWallTorchBlock != Blocks.AIR && unlitWallTorchBlock != Blocks.AIR) {
+                registerBurnableItem(
+                        litItem,
+                        unlitItem,
+                        ConfigCache.getTorchBurnTime(),
+                        ConfigCache.getRainTorchMultiplier()
+                );
+                registerBurnableBlock(
+                        litTorchBlock,
+                        unlitTorchBlock,
+                        ConfigCache.getTorchBurnTime(),
+                        ConfigCache.getRainTorchMultiplier(),
+                        true,
+                        FuelType.TORCH_FUELS
+                );
+                registerBurnableBlock(
+                        litWallTorchBlock,
+                        unlitWallTorchBlock,
+                        ConfigCache.getTorchBurnTime(),
+                        ConfigCache.getRainTorchMultiplier(),
+                        true,
+                        FuelType.TORCH_FUELS
+                );
+                LOGGER.debug(
+                        "Registered Chipped torch: {} (unlit torch: {}, unlit wall torch: {}, unlit item: {})",
+                        variant,
+                        Registries.BLOCK.getId(unlitTorchBlock),
+                        Registries.BLOCK.getId(unlitWallTorchBlock),
+                        Registries.ITEM.getId(unlitItem)
+                );
+            } else {
+                LOGGER.warn("Failed to register Chipped torch: {} (litItem: {}, unlitItem: {}, litTorch: {}, unlitTorch: {}, litWallTorch: {}, unlitWallTorch: {})",
+                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
+                        Registries.BLOCK.getId(litTorchBlock), Registries.BLOCK.getId(unlitTorchBlock),
+                        Registries.BLOCK.getId(litWallTorchBlock), Registries.BLOCK.getId(unlitWallTorchBlock));
+            }
+        }
+    }
+
+    public static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {
         BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier));
         LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
     }
 
-    private static void registerBurnableBlock(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {
+    public static void registerBurnableBlock(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {
         BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, hasBlockEntity, fuelType));
         LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock), fuelType);
     }

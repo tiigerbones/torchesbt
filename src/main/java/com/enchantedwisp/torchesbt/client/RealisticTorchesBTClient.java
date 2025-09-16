@@ -1,5 +1,6 @@
 package com.enchantedwisp.torchesbt.client;
 
+import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import net.fabricmc.api.ClientModInitializer;
@@ -13,6 +14,7 @@ public class RealisticTorchesBTClient implements ClientModInitializer {
     public void onInitializeClient() {
         // Register Particles
         Particles.registerClient();
+        CompatRegistryHandler.registerChippedClient();
 
         // Render Blocks Correctly
         BlockRenderLayerMap.INSTANCE.putBlock(Block.getBlockFromItem(RegistryHandler.UNLIT_TORCH), RenderLayer.getCutout());
