@@ -13,17 +13,13 @@ import net.minecraft.world.biome.Biome;
 import java.util.Objects;
 
 /**
- * Utility methods for handling burn times, rain checks, and item/stack operations.
+ * Utility methods for handling burn times, rain checks.
  */
 public class BurnTimeUtils {
     public static final String BURN_TIME_KEY = "remaining_burn";
 
     public static long getMaxBurnTime(ItemStack stack) {
         return BurnableRegistry.getBurnTime(stack.getItem());
-    }
-
-    public static double getRainMultiplier(net.minecraft.item.Item item) {
-        return BurnableRegistry.getRainMultiplier(item);
     }
 
     public static long getCurrentBurnTime(ItemStack stack) {
@@ -46,28 +42,6 @@ public class BurnTimeUtils {
         return 0;
     }
 
-    public static void setCurrentBurnTime(BlockEntity entity, long burnTime) {
-        if (entity instanceof Burnable burnable) {
-            burnable.setRemainingBurnTime(burnTime);
-        } else if (entity instanceof ICampfireBurnAccessor accessor) {
-            accessor.torchesbt_setBurnTime(burnTime);
-            entity.markDirty();
-        }
-    }
-
-    public static void initializeBurnTime(ItemStack stack) {
-        setCurrentBurnTime(stack, getMaxBurnTime(stack));
-    }
-
-    public static ItemStack splitAndInitializeStack(ItemStack stack, int count) {
-        ItemStack newStack = stack.copy();
-        newStack.setCount(count);
-        long burnTime = getCurrentBurnTime(stack);
-        setCurrentBurnTime(newStack, burnTime);
-        stack.decrement(count);
-        return newStack;
-    }
-
     // --- Centralized rain check ---
     public static boolean isActuallyRainingAt(World world, BlockPos pos) {
         if (world.getFluidState(pos).isIn(FluidTags.WATER)) return false; // Submersion handled separately
@@ -77,9 +51,5 @@ public class BurnTimeUtils {
                 world.isRaining() &&
                 world.isSkyVisible(pos) &&
                 (precipitation == Biome.Precipitation.RAIN || precipitation == Biome.Precipitation.SNOW);
-    }
-
-    public static boolean isBurnableItem(ItemStack stack) {
-        return BurnableRegistry.isBurnableItem(stack.getItem());
     }
 }

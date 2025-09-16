@@ -35,24 +35,47 @@ public class BurnableRegistry {
         LANTERN_FUELS(JsonLoader.LANTERN_FUELS),
         TORCH_FUELS(JsonLoader.TORCH_FUELS);
 
+        /** Map of fuel items to their burn times. */
         private final Map<Identifier, Integer> fuelMap;
 
+        /**
+         * Constructs a FuelType with the specified fuel map.
+         *
+         * @param fuelMap The map of fuel items to their burn times.
+         */
         FuelType(Map<Identifier, Integer> fuelMap) {
             this.fuelMap = fuelMap;
         }
 
+        /**
+         * Retrieves the fuel map associated with this fuel type.
+         *
+         * @return The map of fuel items to their burn times.
+         */
         public Map<Identifier, Integer> getFuelMap() {
             return fuelMap;
         }
     }
 
     /**
-     * Represents a burnable item with its properties.
+     * Record representing a burnable item with its properties.
+     *
+     * @param litItem The item in its lit state.
+     * @param unlitItem The item in its unlit state.
+     * @param burnTime The duration the item burns for (in ticks).
+     * @param rainMultiplier The multiplier applied to burn time in rain.
      */
     public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {}
 
     /**
-     * Represents a burnable block with its properties and fuel type.
+     * Record representing a burnable block with its properties and fuel type.
+     *
+     * @param litBlock The block in its lit state.
+     * @param unlitBlock The block in its unlit state.
+     * @param burnTime The duration the block burns for (in ticks).
+     * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param hasBlockEntity Whether the block has a block entity.
+     * @param fuelType The type of fuel used by the block.
      */
     public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {}
 
@@ -237,11 +260,29 @@ public class BurnableRegistry {
         }
     }
 
+    /**
+     * Registers a burnable item with its properties.
+     *
+     * @param litItem The item in its lit state.
+     * @param unlitItem The item in its unlit state.
+     * @param burnTime The duration the item burns for (in ticks).
+     * @param rainMultiplier The multiplier applied to burn time in rain.
+     */
     public static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {
         BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier));
         LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
     }
 
+    /**
+     * Registers a burnable block with its properties and fuel type.
+     *
+     * @param litBlock The block in its lit state.
+     * @param unlitBlock The block in its unlit state.
+     * @param burnTime The duration the block burns for (in ticks).
+     * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param hasBlockEntity Whether the block has a block entity.
+     * @param fuelType The type of fuel used by the block.
+     */
     public static void registerBurnableBlock(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {
         BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, hasBlockEntity, fuelType));
         LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock), fuelType);

@@ -14,9 +14,6 @@ import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class ModLootTableProvider extends FabricBlockLootTableProvider {
     private static final String[] CHIPPED_LANTERNS = {
             "blue_paper", "burning_coal", "checkered_iron", "dark_blue_paper",
