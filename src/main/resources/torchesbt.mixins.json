@@ -5,9 +5,11 @@
   "mixins": [
     "BlockMixin",
     "CampfireBlockEntityMixin",
+    "ChippedInitializerMixin",
     "ItemMixin",
     "ItemStackMixin",
     "LanternBlockMixin",
+    "SpecialLanternBlockMixin",
     "TorchBlockMixin",
     "WallTorchBlockMixin"
   ],

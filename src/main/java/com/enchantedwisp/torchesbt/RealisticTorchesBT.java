@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt;
 import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
+import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.integration.DynamicLightManager;
@@ -57,6 +58,9 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Register BurnableRegistry
         BurnableRegistry.register();
+        LOGGER.info("Registered {} burnable items and {} burnable blocks",
+                BurnableRegistry.getBurnableItemsCount(),
+                BurnableRegistry.getBurnableBlocksCount());
 
         // Register Particle
         Particles.register();

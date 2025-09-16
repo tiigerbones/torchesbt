@@ -79,6 +79,14 @@ public class BurnableRegistry {
      */
     public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, boolean hasBlockEntity, FuelType fuelType) {}
 
+    public static int getBurnableItemsCount() {
+        return BURNABLE_ITEMS.size();
+    }
+
+    public static int getBurnableBlocksCount() {
+        return BURNABLE_BLOCKS.size();
+    }
+
     public static void register() {
         // Register default burnable items and blocks
         registerBurnableItem(
@@ -125,13 +133,6 @@ public class BurnableRegistry {
                 true,
                 FuelType.CAMPFIRE_FUELS
         );
-
-        // Register Chipped burnables on server start to ensure Chipped's items/blocks are available
-        if (FabricLoader.getInstance().isModLoaded("chipped")) {
-            ServerLifecycleEvents.SERVER_STARTING.register(server -> registerChippedBurnables());
-        }
-
-        LOGGER.info("Registered {} burnable items and {} burnable blocks", BURNABLE_ITEMS.size(), BURNABLE_BLOCKS.size());
     }
 
     public static void registerChippedBurnables() {
@@ -140,16 +141,6 @@ public class BurnableRegistry {
             return;
         }
         LOGGER.info("Chipped mod detected, registering Chipped burnables");
-
-        // Log all registered items and blocks in the 'chipped' namespace for debugging
-        LOGGER.debug("Registered items in 'chipped' namespace:");
-        Registries.ITEM.getIds().stream()
-                .filter(id -> id.getNamespace().equals("chipped"))
-                .forEach(id -> LOGGER.debug("Item: {}", id));
-        LOGGER.debug("Registered blocks in 'chipped' namespace:");
-        Registries.BLOCK.getIds().stream()
-                .filter(id -> id.getNamespace().equals("chipped"))
-                .forEach(id -> LOGGER.debug("Block: {}", id));
 
         // Chipped lanterns
         String[] chippedLanterns = {
