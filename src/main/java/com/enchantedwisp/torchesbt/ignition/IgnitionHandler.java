@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
@@ -57,7 +58,9 @@ public class IgnitionHandler {
             if (JsonLoader.IGNITERS.containsKey(itemId)) {
                 Item litItem = BurnableRegistry.getLitItem(offHandStack.getItem());
                 if (litItem != null) {
-                    return igniteItem(world, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND, offHandStack, stack, litItem, offHandStack.getItem(), player);
+                    return igniteItem(world,
+                            hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND,
+                            offHandStack, stack, litItem, offHandStack.getItem(), player);
                 }
             }
 
@@ -87,8 +90,10 @@ public class IgnitionHandler {
                     ReignitionHandler.consumeIgniter(stack, player, hand);
                     return ActionResult.SUCCESS;
                 } else if (litBlock != state.getBlock()) {
-                    world.setBlockState(pos, litBlock.getDefaultState(), 3);
-                    BurnTimeManager.setBurnTimeOnPlacement(world, pos, world.getBlockEntity(pos), stack, JsonLoader.IGNITERS.get(itemId) * 20L);
+                    BlockState newState = copyProperties(state, litBlock.getDefaultState());
+                    world.setBlockState(pos, newState, 3);
+                    BurnTimeManager.setBurnTimeOnPlacement(world, pos, world.getBlockEntity(pos),
+                            stack, JsonLoader.IGNITERS.get(itemId) * 20L);
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
                     ReignitionHandler.consumeIgniter(stack, player, hand);
                     LOGGER.debug("Ignited block {} at {} using {}", litBlock, pos, stack.getItem());
@@ -122,5 +127,16 @@ public class IgnitionHandler {
             }
         }
         return TypedActionResult.success(newStack);
+    }
+
+    // --- Helper to copy orientation/waterlogging/etc. ---
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static BlockState copyProperties(BlockState from, BlockState to) {
+        for (Property<?> property : from.getProperties()) {
+            if (to.contains(property)) {
+                to = to.with((Property) property, from.get(property));
+            }
+        }
+        return to;
     }
 }

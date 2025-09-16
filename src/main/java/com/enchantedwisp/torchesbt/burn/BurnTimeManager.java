@@ -9,8 +9,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -20,6 +18,7 @@ import org.slf4j.Logger;
 import java.util.List;
 import java.util.Objects;
 
+import static com.enchantedwisp.torchesbt.ignition.IgnitionHandler.copyProperties;
 import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightsEnabled;
 
 /**
@@ -125,8 +124,12 @@ public class BurnTimeManager {
     private static void tickBurnableBlock(World world, BlockPos pos, BlockState state, Block block, Burnable burnable) {
         long burnTime = burnable.getRemainingBurnTime();
         if (burnTime <= 0) {
-            Block unlit = BurnableRegistry.getUnlitBlock(block);
-            if (unlit != null) world.setBlockState(pos, unlit.getDefaultState(), 3);
+            Block unlit = BurnableRegistry.getUnlitBlock(state.getBlock());
+            if (unlit != null && unlit != state.getBlock()) {
+                BlockState newState = copyProperties(state, unlit.getDefaultState());
+                world.setBlockState(pos, newState, 3);
+                LOGGER.debug("Extinguished {} at {}", unlit, pos);
+            }
             return;
         }
         burnable.tickBurn(world, true);

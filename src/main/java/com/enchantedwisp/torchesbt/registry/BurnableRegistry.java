@@ -8,12 +8,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
 import org.slf4j.Logger;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -157,9 +160,6 @@ public class BurnableRegistry {
                         Registries.BLOCK.getId(unlitBlock),
                         Registries.ITEM.getId(unlitItem)
                 );
-                LOGGER.warn("Failed to register Chipped lantern: {} (litItem: {}, unlitItem: {}, litBlock: {}, unlitBlock: {})",
-                        variant, Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem),
-                        Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock));
         }
 
         // Chipped special lanterns
