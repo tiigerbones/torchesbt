@@ -1,3 +1,6 @@
 {
-  "parent": "torchesbt:block/chipped/unlit_wooden_cage_lantern"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "torchesbt:item/chipped/lantern/unlit_wooden_cage_lantern"
+  }
 }

@@ -157,8 +157,17 @@ public class ChippedRegistryHandler {
     @Environment(EnvType.CLIENT)
     public static void registerRenderLayers() {
         for (Block lantern : UNLIT_LANTERN_BLOCKS) {
-            BlockRenderLayerMap.INSTANCE.putBlock(lantern, RenderLayer.getCutout());
+            Identifier id = Registries.BLOCK.getId(lantern);
+
+            if (id.getPath().contains("small_green") || id.getPath().contains("ender") || id.getPath().contains("yellow_tube")) {
+                // These have low-opacity textures (use translucent)
+                BlockRenderLayerMap.INSTANCE.putBlock(lantern, RenderLayer.getTranslucent());
+            } else {
+                // These only need alpha cutout (holes, cages, etc.)
+                BlockRenderLayerMap.INSTANCE.putBlock(lantern, RenderLayer.getCutout());
+            }
         }
+
         for (Block torch : UNLIT_TORCH_BLOCKS) {
             BlockRenderLayerMap.INSTANCE.putBlock(torch, RenderLayer.getCutout());
         }
