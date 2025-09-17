@@ -2,6 +2,7 @@ package com.enchantedwisp.torchesbt.compat;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.compat.chipped.ChippedRegistryHandler;
+import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
@@ -26,9 +27,13 @@ public class CompatRegistryHandler {
     public static void registerChipped() {
         runIfModLoaded(
                 "chipped",
-                ChippedRegistryHandler::register,
-                "registered burnable compatibility",
-                "skipping burnable compatibility"
+                () -> {
+                    ChippedRegistryHandler.register();
+                    ChippedRegistryHandler.registerBurnables();
+                    ChippedModBlockEntities.register();
+                },
+                "registered burnable + extra compat",
+                "skipping chipped compat"
         );
     }
 

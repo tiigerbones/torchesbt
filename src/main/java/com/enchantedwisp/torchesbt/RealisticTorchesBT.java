@@ -3,10 +3,8 @@ package com.enchantedwisp.torchesbt;
 import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
-import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
-import com.enchantedwisp.torchesbt.integration.DynamicLightManager;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
@@ -50,14 +48,16 @@ public class RealisticTorchesBT implements ModInitializer {
             configHolder = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class);
         }
 
-        // Compat Items
-        CompatRegistryHandler.registerChipped();
-
         // Initialize ConfigCache
         ConfigCache.initialize();
 
-        // Register BurnableRegistry
-        BurnableRegistry.register();
+        // Register items
+        RegistryHandler.register();
+        ModBlockEntities.register();
+
+        // Compat Items
+        CompatRegistryHandler.registerChipped();
+
         LOGGER.info("Registered {} burnable items and {} burnable blocks",
                 BurnableRegistry.getBurnableItemsCount(),
                 BurnableRegistry.getBurnableBlocksCount());
@@ -65,20 +65,11 @@ public class RealisticTorchesBT implements ModInitializer {
         // Register Particle
         Particles.register();
 
-        // Register items
-        RegistryHandler.register();
-
-        // Ignite
+        // Burntime
         ReignitionHandler.register();
-
         BurnTimeManager.register();
-
-        ModBlockEntities.register();
 
         // Json
         JsonLoader.register();
-
-        // Initialize dynamic light support check
-        DynamicLightManager.init();
     }
 }

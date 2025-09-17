@@ -8,10 +8,13 @@ import com.enchantedwisp.torchesbt.registry.items.SparkStoneItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitCampFireItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitLanternItem;
 import com.enchantedwisp.torchesbt.registry.items.UnlitTorchItem;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
@@ -30,6 +33,7 @@ public class RegistryHandler {
     public static void register() {
         registerItemGroups();
         registerUnlitGroups();
+        registerBurnables();
         RealisticTorchesBT.LOGGER.info("Registering blocks, items, and block entities for Realistic torches BT");
 
         Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "unlit_torch"), UNLIT_TORCH_BLOCK);
@@ -53,6 +57,53 @@ public class RegistryHandler {
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
             entries.add(SPARK_STONE);
         });
+    }
+
+    public static void registerBurnables() {
+        BurnableRegistry.registerBurnableItem(
+                Items.TORCH,
+                RegistryHandler.UNLIT_TORCH,
+                ConfigCache.getTorchBurnTime(),
+                ConfigCache.getRainTorchMultiplier()
+        );
+        BurnableRegistry.registerBurnableItem(
+                Items.LANTERN,
+                RegistryHandler.UNLIT_LANTERN,
+                ConfigCache.getLanternBurnTime(),
+                ConfigCache.getRainLanternMultiplier()
+        );
+        BurnableRegistry.registerBurnableBlock(
+                Blocks.TORCH,
+                RegistryHandler.UNLIT_TORCH_BLOCK,
+                ConfigCache.getTorchBurnTime(),
+                ConfigCache.getRainTorchMultiplier(),
+                true,
+                BurnableRegistry.FuelType.TORCH_FUELS
+        );
+        BurnableRegistry.registerBurnableBlock(
+                Blocks.WALL_TORCH,
+                RegistryHandler.UNLIT_WALL_TORCH_BLOCK,
+                ConfigCache.getTorchBurnTime(),
+                ConfigCache.getRainTorchMultiplier(),
+                true,
+                BurnableRegistry.FuelType.TORCH_FUELS
+        );
+        BurnableRegistry.registerBurnableBlock(
+                Blocks.LANTERN,
+                RegistryHandler.UNLIT_LANTERN_BLOCK,
+                ConfigCache.getLanternBurnTime(),
+                ConfigCache.getRainLanternMultiplier(),
+                true,
+                BurnableRegistry.FuelType.LANTERN_FUELS
+        );
+        BurnableRegistry.registerBurnableBlock(
+                Blocks.CAMPFIRE,
+                Blocks.CAMPFIRE, // Unlit uses same block with LIT=false
+                ConfigCache.getCampfireBurnTime(),
+                ConfigCache.getRainCampfireMultiplier(),
+                true,
+                BurnableRegistry.FuelType.CAMPFIRE_FUELS
+        );
     }
 
 }

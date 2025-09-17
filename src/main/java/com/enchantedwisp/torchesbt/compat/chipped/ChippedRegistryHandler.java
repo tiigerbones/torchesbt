@@ -9,6 +9,7 @@ import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitTorchItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -72,10 +73,6 @@ public class ChippedRegistryHandler {
             UNLIT_LANTERN_ITEMS.forEach(entries::add);
             UNLIT_TORCH_ITEMS.forEach(entries::add);
         });
-
-        // Register Chipped burnables after blocks and items are registered
-        BurnableRegistry.registerChippedBurnables();
-
         RealisticTorchesBT.LOGGER.info("Registered {} Chipped unlit items and blocks", UNLIT_LANTERN_ITEMS.size() + UNLIT_TORCH_ITEMS.size() * 2);
     }
 
@@ -152,6 +149,98 @@ public class ChippedRegistryHandler {
                 "Registered torch: {} (unlit torch: {}, unlit wall torch: {}, unlit item: {})",
                 variant, unlitTorchBlockId, unlitWallTorchBlockId, unlitItemId
         );
+    }
+
+    public static void registerBurnables() {
+        for (String variant : CHIPPED_LANTERNS) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_lantern"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
+            Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            BurnableRegistry.registerBurnableItem(
+                    litItem,
+                    unlitItem,
+                    ConfigCache.getLanternBurnTime(),
+                    ConfigCache.getRainLanternMultiplier()
+            );
+            BurnableRegistry.registerBurnableBlock(
+                    litBlock,
+                    unlitBlock,
+                    ConfigCache.getLanternBurnTime(),
+                    ConfigCache.getRainLanternMultiplier(),
+                    true,
+                    BurnableRegistry.FuelType.LANTERN_FUELS
+            );
+            RealisticTorchesBT.LOGGER.debug(
+                    "Registered Chipped lantern: {} (unlit block: {}, unlit item: {})",
+                    variant,
+                    Registries.BLOCK.getId(unlitBlock),
+                    Registries.ITEM.getId(unlitItem)
+            );
+        }
+        for (String variant : SPECIAL_LANTERNS) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_lantern"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            Block litBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_lantern"));
+            Block unlitBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
+            BurnableRegistry.registerBurnableItem(
+                    litItem,
+                    unlitItem,
+                    ConfigCache.getLanternBurnTime(),
+                    ConfigCache.getRainLanternMultiplier()
+            );
+            BurnableRegistry.registerBurnableBlock(
+                    litBlock,
+                    unlitBlock,
+                    ConfigCache.getLanternBurnTime(),
+                    ConfigCache.getRainLanternMultiplier(),
+                    true,
+                    BurnableRegistry.FuelType.LANTERN_FUELS
+            );
+            RealisticTorchesBT.LOGGER.debug(
+                    "Registered Chipped special lantern: {} (unlit block: {}, unlit item: {})",
+                    variant,
+                    Registries.BLOCK.getId(unlitBlock),
+                    Registries.ITEM.getId(unlitItem)
+            );
+        }
+        for (String variant : CHIPPED_TORCHES) {
+            Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_torch"));
+            Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_torch"));
+            Block litTorchBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_torch"));
+            Block unlitTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_torch"));
+            Block litWallTorchBlock = Registries.BLOCK.get(Identifier.of("chipped", variant + "_wall_torch"));
+            Block unlitWallTorchBlock = Registries.BLOCK.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_wall_torch"));
+            BurnableRegistry.registerBurnableItem(
+                    litItem,
+                    unlitItem,
+                    ConfigCache.getTorchBurnTime(),
+                    ConfigCache.getRainTorchMultiplier()
+            );
+            BurnableRegistry.registerBurnableBlock(
+                    litTorchBlock,
+                    unlitTorchBlock,
+                    ConfigCache.getTorchBurnTime(),
+                    ConfigCache.getRainTorchMultiplier(),
+                    true,
+                    BurnableRegistry.FuelType.TORCH_FUELS
+            );
+            BurnableRegistry.registerBurnableBlock(
+                    litWallTorchBlock,
+                    unlitWallTorchBlock,
+                    ConfigCache.getTorchBurnTime(),
+                    ConfigCache.getRainTorchMultiplier(),
+                    true,
+                    BurnableRegistry.FuelType.TORCH_FUELS
+            );
+            RealisticTorchesBT.LOGGER.debug(
+                    "Registered Chipped torch: {} (unlit torch: {}, unlit wall torch: {}, unlit item: {})",
+                    variant,
+                    Registries.BLOCK.getId(unlitTorchBlock),
+                    Registries.BLOCK.getId(unlitWallTorchBlock),
+                    Registries.ITEM.getId(unlitItem)
+            );
+        }
     }
 
     @Environment(EnvType.CLIENT)
