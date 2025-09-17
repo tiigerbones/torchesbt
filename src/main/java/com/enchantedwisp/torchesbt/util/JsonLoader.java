@@ -20,12 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class JsonLoader {
-    private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
-    private static final Gson GSON = new Gson();
     public static final Map<Identifier, Integer> IGNITERS = new HashMap<>();
     public static final Map<Identifier, Integer> CAMPFIRE_FUELS = new HashMap<>();
     public static final Map<Identifier, Integer> LANTERN_FUELS = new HashMap<>();
     public static final Map<Identifier, Integer> TORCH_FUELS = new HashMap<>();
+    private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
+    private static final Gson GSON = new Gson();
 
     public static void register() {
         // Register reload listener for server data

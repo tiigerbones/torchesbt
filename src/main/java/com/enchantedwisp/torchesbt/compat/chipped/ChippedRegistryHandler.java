@@ -5,9 +5,9 @@ import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitLanternBlock
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitWallTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.SpecialUnlitLanternBlock;
+import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitTorchItem;
-import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.api.EnvType;

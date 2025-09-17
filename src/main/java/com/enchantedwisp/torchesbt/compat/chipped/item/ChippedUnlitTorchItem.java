@@ -6,8 +6,8 @@ import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitWallTorchBlo
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 
 public class ChippedUnlitTorchItem extends BlockItem {
     private final String variant;

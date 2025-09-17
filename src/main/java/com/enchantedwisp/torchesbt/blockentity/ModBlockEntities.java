@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 public class ModBlockEntities {
     public static final BlockEntityType<TorchBlockEntity> TORCH_BLOCK_ENTITY =
             BlockEntityType.Builder.create(TorchBlockEntity::new, Blocks.TORCH, Blocks.WALL_TORCH).build(null);
+
     public static final BlockEntityType<LanternBlockEntity> LANTERN_BLOCK_ENTITY =
             BlockEntityType.Builder.create(LanternBlockEntity::new, Blocks.LANTERN).build(null);
 

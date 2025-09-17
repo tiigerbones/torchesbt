@@ -2,8 +2,6 @@ package com.enchantedwisp.torchesbt.compat.chipped.blockentity;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
-import earth.terrarium.chipped.common.blocks.SpecialLanternBlock;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
@@ -43,17 +41,17 @@ public class ChippedModBlockEntities {
     }
 
     public static void register() {
-            List<Block> lanternBlocks = getSpecialLanternBlocks();
-            if (lanternBlocks.isEmpty()) {
-                RealisticTorchesBT.LOGGER.error("No valid Chipped SpecialLanternBlocks found — skipping BlockEntityType registration!");
-                return;
-            }
-            SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder.create(SpecialLanternBlockEntity::new, lanternBlocks.toArray(new Block[0])).build(null);
-            Registry.register(
-                    Registries.BLOCK_ENTITY_TYPE,
-                    Identifier.of(RealisticTorchesBT.MOD_ID, "special_lantern_block_entity"),
-                    SPECIAL_LANTERN_BLOCK_ENTITY
-            );
-            RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity for Chipped mod");
+        List<Block> lanternBlocks = getSpecialLanternBlocks();
+        if (lanternBlocks.isEmpty()) {
+            RealisticTorchesBT.LOGGER.error("No valid Chipped SpecialLanternBlocks found — skipping BlockEntityType registration!");
+            return;
         }
+        SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder.create(SpecialLanternBlockEntity::new, lanternBlocks.toArray(new Block[0])).build(null);
+        Registry.register(
+                Registries.BLOCK_ENTITY_TYPE,
+                Identifier.of(RealisticTorchesBT.MOD_ID, "special_lantern_block_entity"),
+                SPECIAL_LANTERN_BLOCK_ENTITY
+        );
+        RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity for Chipped mod");
     }
+}

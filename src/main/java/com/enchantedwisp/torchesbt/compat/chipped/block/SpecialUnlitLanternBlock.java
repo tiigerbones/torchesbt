@@ -1,10 +1,6 @@
 package com.enchantedwisp.torchesbt.compat.chipped.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.Waterloggable;
+import net.minecraft.block.*;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
@@ -17,7 +13,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
-
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("deprecation")
@@ -25,13 +20,11 @@ public class SpecialUnlitLanternBlock extends Block implements Waterloggable {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final BooleanProperty HANGING = Properties.HANGING;
     public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-
-    private final VoxelShape toEast;
-    private final VoxelShape toNorth;
-
     // Example shapes (can be replaced with your custom lantern voxel shapes)
     public static final VoxelShape DEFAULT_EAST_SHAPE = Block.createCuboidShape(5.0D, 0.0D, 1.0D, 11.0D, 15.0D, 15.0D);
     public static final VoxelShape DEFAULT_NORTH_SHAPE = Block.createCuboidShape(1.0D, 0.0D, 5.0D, 15.0D, 15.0D, 11.0D);
+    private final VoxelShape toEast;
+    private final VoxelShape toNorth;
 
     public SpecialUnlitLanternBlock(Settings settings, VoxelShape shape) {
         super(settings.luminance(state -> 0)); // no light

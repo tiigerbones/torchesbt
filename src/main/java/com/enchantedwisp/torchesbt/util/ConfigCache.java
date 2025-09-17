@@ -30,26 +30,52 @@ public class ConfigCache {
         enableDynamicLights = config.enableDynamicLights;
 
         LOGGER.info(
-            "Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}, dynamicLights={}",
-            torchBurnTime,
-            enableRainExtinguish,
-            enableDynamicLights
+                "Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}, dynamicLights={}",
+                torchBurnTime,
+                enableRainExtinguish,
+                enableDynamicLights
         );
 
         LOGGER.info(
-            "Dynamic lighting support: {} (config)",
-            enableDynamicLights ? "Enabled" : "Disabled"
+                "Dynamic lighting support: {} (config)",
+                enableDynamicLights ? "Enabled" : "Disabled"
         );
     }
 
     // Getters...
-    public static long getTorchBurnTime() { return torchBurnTime; }
-    public static long getLanternBurnTime() { return lanternBurnTime; }
-    public static long getCampfireBurnTime() { return campfireBurnTime; }
-    public static boolean isRainExtinguishEnabled() { return enableRainExtinguish; }
-    public static double getRainTorchMultiplier() { return rainTorchMultiplier; }
-    public static double getRainCampfireMultiplier() { return rainCampfireMultiplier; }
-    public static double getRainLanternMultiplier() { return rainLanternMultiplier; }
-    public static double getWaterLanternMultiplier() { return waterLanternMultiplier; }
-    public static boolean isDynamicLightsEnabled() { return enableDynamicLights; }
+    public static long getTorchBurnTime() {
+        return torchBurnTime;
+    }
+
+    public static long getLanternBurnTime() {
+        return lanternBurnTime;
+    }
+
+    public static long getCampfireBurnTime() {
+        return campfireBurnTime;
+    }
+
+    public static boolean isRainExtinguishEnabled() {
+        return enableRainExtinguish;
+    }
+
+    public static double getRainTorchMultiplier() {
+        return rainTorchMultiplier;
+    }
+
+    public static double getRainCampfireMultiplier() {
+        return rainCampfireMultiplier;
+    }
+
+    public static double getRainLanternMultiplier() {
+        return rainLanternMultiplier;
+    }
+
+    public static double getWaterLanternMultiplier() {
+        return waterLanternMultiplier;
+    }
+
+    public static boolean isDynamicLightsEnabled() {
+        return enableDynamicLights;
+    }
 }

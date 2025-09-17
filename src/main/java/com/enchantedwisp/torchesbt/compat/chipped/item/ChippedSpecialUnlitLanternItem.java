@@ -1,13 +1,12 @@
 package com.enchantedwisp.torchesbt.compat.chipped.item;
 
+import com.enchantedwisp.torchesbt.compat.chipped.block.SpecialUnlitLanternBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.math.Direction;
-import com.enchantedwisp.torchesbt.compat.chipped.block.SpecialUnlitLanternBlock;
 
 public class ChippedSpecialUnlitLanternItem extends BlockItem {
     public ChippedSpecialUnlitLanternItem(Block block, Settings settings) {
