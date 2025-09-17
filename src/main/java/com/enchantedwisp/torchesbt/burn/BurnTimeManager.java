@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt.burn;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.enchantedwisp.torchesbt.ignition.IgnitionHandler.copyProperties;
-import static com.enchantedwisp.torchesbt.integration.DynamicLightManager.isDynamicLightsEnabled;
 
 /**
  * Handles burn time ticking for player-held items, nearby dropped items, and burnable blocks.
@@ -52,7 +52,7 @@ public class BurnTimeManager {
             ItemStack stack = player.getStackInHand(hand);
             if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
 
-            if (!isDynamicLightsEnabled()) continue;
+            if (!ConfigCache.isDynamicLightsEnabled()) continue;
 
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
             if (burnTime <= 0) {
@@ -103,7 +103,7 @@ public class BurnTimeManager {
         // Dropped items
         List<ItemEntity> items = world.getEntitiesByClass(ItemEntity.class, scanBox, e -> BurnableRegistry.isBurnableItem(e.getStack().getItem()));
         for (ItemEntity itemEntity : items) {
-            if (!isDynamicLightsEnabled()) continue;
+            if (!ConfigCache.isDynamicLightsEnabled()) continue;
 
             ItemStack stack = itemEntity.getStack();
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
