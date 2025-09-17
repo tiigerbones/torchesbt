@@ -23,7 +23,6 @@ public class ChippedModBlockEntities {
 
     public static List<Block> getSpecialLanternBlocks() {
         List<Block> validBlocks = new ArrayList<>();
-        // You can adjust variants here if IDs are wrong (e.g., add "_iron")
 
         for (String variant : SPECIAL_LANTERNS) {
             Identifier id = Identifier.of("chipped", variant + "_lantern"); // Try variant + "_iron_lantern" if this fails
@@ -44,7 +43,6 @@ public class ChippedModBlockEntities {
     }
 
     public static void register() {
-        if (FabricLoader.getInstance().isModLoaded("chipped")) {
             List<Block> lanternBlocks = getSpecialLanternBlocks();
             if (lanternBlocks.isEmpty()) {
                 RealisticTorchesBT.LOGGER.error("No valid Chipped SpecialLanternBlocks found — skipping BlockEntityType registration!");
@@ -57,8 +55,5 @@ public class ChippedModBlockEntities {
                     SPECIAL_LANTERN_BLOCK_ENTITY
             );
             RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity for Chipped mod");
-        } else {
-            RealisticTorchesBT.LOGGER.info("Chipped mod not detected, skipping SpecialLanternBlockEntity registration");
         }
     }
-}
