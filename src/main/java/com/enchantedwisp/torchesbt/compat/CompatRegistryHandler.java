@@ -30,19 +30,17 @@ public class CompatRegistryHandler {
         runIfModLoaded(
                 "chipped",
                 () -> {
-                    ChippedRegistryHandler.register();           // blocks/items
-                    ChippedModBlockEntities.register();         // block entity type
+                    ChippedRegistryHandler.register();
+                    ChippedModBlockEntities.register();
 
                     // Delay burnables + block linking until server is ready
                     ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-                        // Snapshot counts before registering Chipped burnables
                         int beforeItems = BurnableRegistry.getBurnableItemsCount();
                         int beforeBlocks = BurnableRegistry.getBurnableBlocksCount();
 
                         ChippedRegistryHandler.registerBurnables();
                         ChippedModBlockEntities.linkBlocks();
 
-                        // Calculate exactly how many were added
                         int addedItems = BurnableRegistry.getBurnableItemsCount() - beforeItems;
                         int addedBlocks = BurnableRegistry.getBurnableBlocksCount() - beforeBlocks;
 
@@ -53,7 +51,7 @@ public class CompatRegistryHandler {
                         );
                     });
                 },
-                "scheduled burnable + extra compat init",
+                "registered",
                 "skipping chipped compat"
         );
     }

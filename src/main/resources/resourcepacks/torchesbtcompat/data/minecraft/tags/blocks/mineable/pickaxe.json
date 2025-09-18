@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "torchesbt:chipped/unlit_blue_paper_lantern",
+    "torchesbt:chipped/unlit_burning_coal_lantern",
+    "torchesbt:chipped/unlit_checkered_iron_lantern",
+    "torchesbt:chipped/unlit_dark_blue_paper_lantern",
+    "torchesbt:chipped/unlit_ender_lantern",
+    "torchesbt:chipped/unlit_green_paper_lantern",
+    "torchesbt:chipped/unlit_iron_bowl_lantern",
+    "torchesbt:chipped/unlit_purple_paper_lantern",
+    "torchesbt:chipped/unlit_red_paper_lantern",
+    "torchesbt:chipped/unlit_small_green_lantern",
+    "torchesbt:chipped/unlit_white_paper_lantern",
+    "torchesbt:chipped/unlit_wooden_cage_lantern",
+    "torchesbt:chipped/unlit_wrought_iron_lantern",
+    "torchesbt:chipped/unlit_yellow_tube_lantern",
+    "torchesbt:chipped/unlit_big_lantern",
+    "torchesbt:chipped/unlit_donut_lantern",
+    "torchesbt:chipped/unlit_tall_lantern",
+    "torchesbt:chipped/unlit_wide_lantern"
+  ]
+}
