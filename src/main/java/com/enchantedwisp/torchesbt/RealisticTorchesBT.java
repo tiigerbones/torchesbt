@@ -3,6 +3,7 @@ package com.enchantedwisp.torchesbt;
 import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
+import com.enchantedwisp.torchesbt.compat.CompatResourceLoader;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
@@ -63,6 +64,7 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Compat Items
         CompatRegistryHandler.registerChipped();
+        CompatResourceLoader.loadChippedResources();
 
 
         // Register Particle
