@@ -38,8 +38,14 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @Comment("Burn time multiplier for lanterns in rain. Default: 6.5 (6.5x faster) Max: 10.0x")
     public double rainLanternMultiplier = 6.5;
 
-    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster) Max: 10.0x")
+    @Comment("Burn time multiplier for torches in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
+    public double waterTorchMultiplier = 10;
+
+    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
     public double waterLanternMultiplier = 7.5;
+
+    @Comment("Burn time multiplier for campfires in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
+    public double waterCampfireMultiplier = 10;
 
     @Override
     public void validatePostLoad() {
@@ -56,9 +62,17 @@ public class RealisticTorchesBTConfig implements ConfigData {
             RealisticTorchesBT.LOGGER.warn("Correcting rainLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainLanternMultiplier, Math.max(1.0, Math.min(10.0, rainLanternMultiplier)));
             rainLanternMultiplier = Math.max(1.0, Math.min(10.0, rainLanternMultiplier));
         }
+        if (waterTorchMultiplier < 1.0 || waterTorchMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting waterTorchMultiplier: {} to {}. Must be between 1.0 and 10.0.", waterTorchMultiplier, Math.max(1.0, Math.min(10.0, waterTorchMultiplier)));
+            waterTorchMultiplier = Math.max(1.0, Math.min(10.0, waterTorchMultiplier));
+        }
         if (waterLanternMultiplier < 1.0 || waterLanternMultiplier > 10.0) {
-            RealisticTorchesBT.LOGGER.warn("Correcting waterLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", waterLanternMultiplier, Math.max(1.0, Math.min(10.0, rainLanternMultiplier)));
+            RealisticTorchesBT.LOGGER.warn("Correcting waterLanternMultiplier: {} to {}. Must be between 1.0 and 10.0.", waterLanternMultiplier, Math.max(1.0, Math.min(10.0, waterLanternMultiplier)));
             waterLanternMultiplier = Math.max(1.0, Math.min(10.0, waterLanternMultiplier));
+        }
+        if (waterCampfireMultiplier < 1.0 || waterCampfireMultiplier > 10.0) {
+            RealisticTorchesBT.LOGGER.warn("Correcting waterCampfireMultiplier: {} to {}. Must be between 1.0 and 10.0.", waterCampfireMultiplier, Math.max(1.0, Math.min(10.0, waterCampfireMultiplier)));
+            waterCampfireMultiplier = Math.max(1.0, Math.min(10.0, waterCampfireMultiplier));
         }
     }
 }

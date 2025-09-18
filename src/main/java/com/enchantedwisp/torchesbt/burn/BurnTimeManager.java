@@ -13,6 +13,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -55,7 +56,7 @@ public class BurnTimeManager {
             ItemStack stack = player.getStackInHand(hand);
             if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
 
-            if (!ConfigCache.isDynamicLightsEnabled()) continue;
+            if (ConfigCache.isDynamicLightsEnabled()) continue;
 
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
             if (burnTime <= 0) {
@@ -63,11 +64,28 @@ public class BurnTimeManager {
                 continue;
             }
 
-            double multiplier = BurnTimeUtils.isActuallyRainingAt(player.getWorld(), player.getBlockPos())
-                    ? BurnableRegistry.getRainMultiplier(stack.getItem())
-                    : 1.0;
-            burnTime -= (long) Math.ceil(multiplier);
-            BurnTimeUtils.setCurrentBurnTime(stack, burnTime);
+            World world = player.getWorld();
+            BlockPos pos = player.getBlockPos();
+            boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
+            boolean isSubmerged = player.isSubmergedIn(FluidTags.WATER);
+            double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
+            double waterMult = BurnableRegistry.getWaterMultiplier(stack.getItem());
+
+            if (isSubmerged && waterMult == 10.0) {
+                burnTime = 0;
+                LOGGER.debug("Instantly extinguished held item due to water submersion (multiplier=10)");
+            } else {
+                double effectiveMultiplier = 1.0;
+                if (isRaining) {
+                    effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
+                }
+                if (isSubmerged && waterMult > 0.0) {  // Ignore if <=0
+                    effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
+                }
+                burnTime -= (long) Math.ceil(effectiveMultiplier);
+            }
+
+            BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
 
             if (burnTime <= 0) {
                 extinguishPlayerItem(player, hand, stack);
@@ -106,7 +124,7 @@ public class BurnTimeManager {
         // Dropped items
         List<ItemEntity> items = world.getEntitiesByClass(ItemEntity.class, scanBox, e -> BurnableRegistry.isBurnableItem(e.getStack().getItem()));
         for (ItemEntity itemEntity : items) {
-            if (!ConfigCache.isDynamicLightsEnabled()) continue;
+            if (ConfigCache.isDynamicLightsEnabled()) continue;
 
             ItemStack stack = itemEntity.getStack();
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
@@ -116,11 +134,31 @@ public class BurnTimeManager {
                 continue;
             }
 
-            double multiplier = BurnTimeUtils.isActuallyRainingAt(world, itemEntity.getBlockPos())
-                    ? BurnableRegistry.getRainMultiplier(stack.getItem())
-                    : 1.0;
-            BurnTimeUtils.setCurrentBurnTime(stack, burnTime - (long) Math.ceil(multiplier));
+            boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
+            boolean isSubmerged = itemEntity.isSubmergedIn(FluidTags.WATER);
+            double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
+            double waterMult = BurnableRegistry.getWaterMultiplier(stack.getItem());
+
+            if (isSubmerged && waterMult == 10.0) {
+                burnTime = 0;
+                LOGGER.debug("Instantly extinguished dropped item due to water submersion (multiplier=10)");
+            } else {
+                double effectiveMultiplier = 1.0;
+                if (isRaining) {
+                    effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
+                }
+                if (isSubmerged && waterMult > 0.0) {
+                    effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
+                }
+                burnTime -= (long) Math.ceil(effectiveMultiplier);
+            }
+
+            BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
             itemEntity.setStack(stack);
+
+            if (burnTime <= 0) {
+                ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
+            }
         }
     }
 
@@ -141,22 +179,35 @@ public class BurnTimeManager {
     private static void tickCampfire(World world, BlockPos pos, BlockState state, ICampfireBurnAccessor campfire) {
         long burnTime = campfire.torchesbt_getBurnTime();
 
-        // Only extinguish if burnTime is 0 or less AND the campfire is currently lit
-        if (burnTime <= 0 && state.get(CampfireBlock.LIT)) {
-            world.setBlockState(pos, state.with(CampfireBlock.LIT, false), 3);
-            return;
+        if (burnTime > 0) {
+            boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
+            boolean isSubmerged = world.getFluidState(pos).isIn(FluidTags.WATER);
+            double rainMult = BurnableRegistry.getRainMultiplier(Blocks.CAMPFIRE);
+            double waterMult = BurnableRegistry.getWaterMultiplier(Blocks.CAMPFIRE);
+
+            if (isSubmerged && waterMult == 10.0) {
+                burnTime = 0;
+                LOGGER.debug("Instantly extinguished campfire at {} due to water submersion (multiplier=10)", pos);
+            } else {
+                double effectiveMultiplier = 1.0;
+                if (isRaining) {
+                    effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
+                }
+                if (isSubmerged && waterMult > 0.0) {
+                    effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
+                }
+                burnTime -= (long) Math.ceil(effectiveMultiplier);
+            }
+            campfire.torchesbt_setBurnTime(Math.max(0, burnTime));
         }
 
-        // Only tick burn time if the campfire is still lit
-        if (burnTime > 0) {
-            double multiplier = BurnTimeUtils.isActuallyRainingAt(world, pos)
-                    ? BurnableRegistry.getRainMultiplier(Blocks.CAMPFIRE)
-                    : 1.0;
-            campfire.torchesbt_setBurnTime(burnTime - (long) Math.ceil(multiplier));
-            // Sync to client for real-time Jade tooltip updates
-            if (!world.isClient) {
-                world.updateListeners(pos, state, state, 3);
-            }
+        if (burnTime <= 0 && state.get(CampfireBlock.LIT)) {
+            world.setBlockState(pos, state.with(CampfireBlock.LIT, false), 3);
+        }
+
+// Sync to client
+        if (!world.isClient) {
+            world.updateListeners(pos, state, state, 3);
         }
     }
 

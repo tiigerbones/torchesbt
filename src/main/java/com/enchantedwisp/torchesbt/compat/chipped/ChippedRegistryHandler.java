@@ -161,13 +161,15 @@ public class ChippedRegistryHandler {
                     litItem,
                     unlitItem,
                     ConfigCache.getLanternBurnTime(),
-                    ConfigCache.getRainLanternMultiplier()
+                    ConfigCache.getRainLanternMultiplier(),
+                    ConfigCache.getWaterLanternMultiplier()
             );
             BurnableRegistry.registerBurnableBlock(
                     litBlock,
                     unlitBlock,
                     ConfigCache.getLanternBurnTime(),
                     ConfigCache.getRainLanternMultiplier(),
+                    ConfigCache.getWaterLanternMultiplier(),
                     true,
                     BurnableRegistry.FuelType.LANTERN_FUELS
             );
@@ -187,13 +189,15 @@ public class ChippedRegistryHandler {
                     litItem,
                     unlitItem,
                     ConfigCache.getLanternBurnTime(),
-                    ConfigCache.getRainLanternMultiplier()
+                    ConfigCache.getRainLanternMultiplier(),
+                    ConfigCache.getWaterLanternMultiplier()
             );
             BurnableRegistry.registerBurnableBlock(
                     litBlock,
                     unlitBlock,
                     ConfigCache.getLanternBurnTime(),
                     ConfigCache.getRainLanternMultiplier(),
+                    ConfigCache.getWaterLanternMultiplier(),
                     true,
                     BurnableRegistry.FuelType.LANTERN_FUELS
             );
@@ -215,13 +219,15 @@ public class ChippedRegistryHandler {
                     litItem,
                     unlitItem,
                     ConfigCache.getTorchBurnTime(),
-                    ConfigCache.getRainTorchMultiplier()
+                    ConfigCache.getRainTorchMultiplier(),
+                    ConfigCache.getWaterTorchMultiplier()
             );
             BurnableRegistry.registerBurnableBlock(
                     litTorchBlock,
                     unlitTorchBlock,
                     ConfigCache.getTorchBurnTime(),
                     ConfigCache.getRainTorchMultiplier(),
+                    ConfigCache.getWaterTorchMultiplier(),
                     true,
                     BurnableRegistry.FuelType.TORCH_FUELS
             );
@@ -230,6 +236,7 @@ public class ChippedRegistryHandler {
                     unlitWallTorchBlock,
                     ConfigCache.getTorchBurnTime(),
                     ConfigCache.getRainTorchMultiplier(),
+                    ConfigCache.getWaterTorchMultiplier(),
                     true,
                     BurnableRegistry.FuelType.TORCH_FUELS
             );

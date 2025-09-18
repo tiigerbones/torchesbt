@@ -34,9 +34,10 @@ public class BurnableRegistry {
      * @param unlitItem      The item in its unlit state.
      * @param burnTime       The duration the item burns for (in ticks).
      * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param waterMultiplier The multiplier applied to burn time when underwater.
      */
-    public static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {
-        BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier));
+    public static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {
+        BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier, waterMultiplier));
         LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
     }
 
@@ -47,6 +48,7 @@ public class BurnableRegistry {
      * @param unlitBlock     The block in its unlit state.
      * @param burnTime       The duration the block burns for (in ticks).
      * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param waterMultiplier The multiplier applied to burn time when underwater.
      * @param hasBlockEntity Whether the block has a block entity.
      * @param fuelType       The type of fuel used by the block.
      */
@@ -55,11 +57,11 @@ public class BurnableRegistry {
             Block unlitBlock,
             long burnTime,
             double rainMultiplier,
+            double waterMultiplier,
             boolean hasBlockEntity,
-            FuelType
-                    fuelType
+            FuelType fuelType
     ) {
-        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, hasBlockEntity, fuelType));
+        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, waterMultiplier, hasBlockEntity, fuelType));
         LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock), fuelType);
     }
 
@@ -119,6 +121,16 @@ public class BurnableRegistry {
         return entry != null ? entry.rainMultiplier() : 1.0;
     }
 
+    public static double getWaterMultiplier(Item item) {
+        BurnableItemEntry entry = BURNABLE_ITEMS.get(item);
+        return entry != null ? entry.waterMultiplier() : 1.0;
+    }
+
+    public static double getWaterMultiplier(Block block) {
+        BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
+        return entry != null ? entry.waterMultiplier() : 1.0;
+    }
+
     public static boolean hasBlockEntity(Block block) {
         BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
         return entry != null && entry.hasBlockEntity();
@@ -168,8 +180,9 @@ public class BurnableRegistry {
      * @param unlitItem      The item in its unlit state.
      * @param burnTime       The duration the item burns for (in ticks).
      * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param waterMultiplier The multiplier applied to burn time when underwater.
      */
-    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier) {
+    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {
     }
 
     /**
@@ -179,6 +192,7 @@ public class BurnableRegistry {
      * @param unlitBlock     The block in its unlit state.
      * @param burnTime       The duration the block burns for (in ticks).
      * @param rainMultiplier The multiplier applied to burn time in rain.
+     * @param waterMultiplier The multiplier applied to burn time when underwater.
      * @param hasBlockEntity Whether the block has a block entity.
      * @param fuelType       The type of fuel used by the block.
      */
@@ -187,6 +201,7 @@ public class BurnableRegistry {
             Block unlitBlock,
             long burnTime,
             double rainMultiplier,
+            double waterMultiplier,
             boolean hasBlockEntity,
             FuelType fuelType) {
     }

@@ -42,4 +42,6 @@ public interface Burnable {
      * @return The multiplier (e.g., 2.0 for 2x faster burnout in rain).
      */
     double getRainMultiplier();
+
+    double getWaterMultiplier();
 }

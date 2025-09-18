@@ -54,9 +54,7 @@ public class RegistryHandler {
     }
 
     private static void registerItemGroups() {
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
-            entries.add(SPARK_STONE);
-        });
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> entries.add(SPARK_STONE));
     }
 
     public static void registerBurnables() {
@@ -64,19 +62,22 @@ public class RegistryHandler {
                 Items.TORCH,
                 RegistryHandler.UNLIT_TORCH,
                 ConfigCache.getTorchBurnTime(),
-                ConfigCache.getRainTorchMultiplier()
+                ConfigCache.getRainTorchMultiplier(),
+                ConfigCache.getWaterTorchMultiplier()
         );
         BurnableRegistry.registerBurnableItem(
                 Items.LANTERN,
                 RegistryHandler.UNLIT_LANTERN,
                 ConfigCache.getLanternBurnTime(),
-                ConfigCache.getRainLanternMultiplier()
+                ConfigCache.getRainLanternMultiplier(),
+                ConfigCache.getWaterLanternMultiplier()
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.TORCH,
                 RegistryHandler.UNLIT_TORCH_BLOCK,
                 ConfigCache.getTorchBurnTime(),
                 ConfigCache.getRainTorchMultiplier(),
+                ConfigCache.getWaterTorchMultiplier(),
                 true,
                 BurnableRegistry.FuelType.TORCH_FUELS
         );
@@ -85,6 +86,7 @@ public class RegistryHandler {
                 RegistryHandler.UNLIT_WALL_TORCH_BLOCK,
                 ConfigCache.getTorchBurnTime(),
                 ConfigCache.getRainTorchMultiplier(),
+                ConfigCache.getWaterTorchMultiplier(),
                 true,
                 BurnableRegistry.FuelType.TORCH_FUELS
         );
@@ -93,6 +95,7 @@ public class RegistryHandler {
                 RegistryHandler.UNLIT_LANTERN_BLOCK,
                 ConfigCache.getLanternBurnTime(),
                 ConfigCache.getRainLanternMultiplier(),
+                ConfigCache.getWaterLanternMultiplier(),
                 true,
                 BurnableRegistry.FuelType.LANTERN_FUELS
         );
@@ -101,6 +104,7 @@ public class RegistryHandler {
                 Blocks.CAMPFIRE, // Unlit uses same block with LIT=false
                 ConfigCache.getCampfireBurnTime(),
                 ConfigCache.getRainCampfireMultiplier(),
+                ConfigCache.getWaterCampfireMultiplier(),
                 true,
                 BurnableRegistry.FuelType.CAMPFIRE_FUELS
         );

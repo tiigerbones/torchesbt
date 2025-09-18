@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -46,14 +47,35 @@ public class SpecialLanternBlockEntity extends BlockEntity implements Burnable {
     public void tickBurn(World world, boolean isBlock) {
         if (remainingBurnTime <= 0) return;
 
-        double multiplier = isBlock && BurnTimeUtils.isActuallyRainingAt(world, pos) ? getRainMultiplier() : 1.0;
-        long reduction = (long) Math.ceil(multiplier);
+        boolean isRaining = isBlock && BurnTimeUtils.isActuallyRainingAt(world, pos);
+        boolean isSubmerged = world.getFluidState(pos).isIn(FluidTags.WATER);
+        double rainMult = getRainMultiplier();
+        double waterMult = getWaterMultiplier();
+
+        if (isSubmerged && waterMult == 10.0) {
+            setRemainingBurnTime(0);
+            return;
+        }
+
+        double effectiveMultiplier = 1.0;
+        if (isRaining) {
+            effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
+        }
+        if (isSubmerged && waterMult > 0.0) {
+            effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
+        }
+        long reduction = (long) Math.ceil(effectiveMultiplier);
         setRemainingBurnTime(remainingBurnTime - reduction);
     }
 
     @Override
     public double getRainMultiplier() {
         return BurnableRegistry.getRainMultiplier(getCachedState().getBlock());
+    }
+
+    @Override
+    public double getWaterMultiplier() {
+        return BurnableRegistry.getWaterMultiplier(getCachedState().getBlock());
     }
 
     @Override

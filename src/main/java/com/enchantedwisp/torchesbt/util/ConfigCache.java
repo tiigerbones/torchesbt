@@ -14,7 +14,9 @@ public class ConfigCache {
     private static double rainTorchMultiplier;
     private static double rainCampfireMultiplier;
     private static double rainLanternMultiplier;
+    private static double waterTorchMultiplier;
     private static double waterLanternMultiplier;
+    private static double waterCampfireMultiplier;
     private static boolean enableDynamicLights;
 
     public static void initialize() {
@@ -26,7 +28,9 @@ public class ConfigCache {
         rainTorchMultiplier = config.rainTorchMultiplier;
         rainCampfireMultiplier = config.rainCampfireMultiplier;
         rainLanternMultiplier = config.rainLanternMultiplier;
+        waterTorchMultiplier = config.waterTorchMultiplier;
         waterLanternMultiplier = config.waterLanternMultiplier;
+        waterCampfireMultiplier = config.waterCampfireMultiplier;
         enableDynamicLights = config.enableDynamicLights;
 
         LOGGER.info(
@@ -71,11 +75,19 @@ public class ConfigCache {
         return rainLanternMultiplier;
     }
 
+    public static double getWaterTorchMultiplier() {
+        return waterTorchMultiplier;
+    }
+
     public static double getWaterLanternMultiplier() {
         return waterLanternMultiplier;
     }
 
+    public static double getWaterCampfireMultiplier() {
+        return waterCampfireMultiplier;
+    }
+
     public static boolean isDynamicLightsEnabled() {
-        return enableDynamicLights;
+        return !enableDynamicLights;
     }
 }
