@@ -1,7 +1,6 @@
 package com.enchantedwisp.torchesbt.integration;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
@@ -56,7 +55,7 @@ public class JadePlugin implements IWailaPlugin {
             private long getMaxBurnTime(Block block, BlockEntity entity) {
                 if (entity instanceof Burnable burnable) {
                     return burnable.getMaxBurnTime();
-                } else if (entity instanceof ICampfireBurnAccessor campfire) {
+                } else if (entity instanceof ICampfireBurnAccessor) {
                     return BurnableRegistry.getBurnTime(block);
                 } else {
                     return BurnableRegistry.getBurnTime(block);
