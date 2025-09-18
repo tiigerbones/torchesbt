@@ -17,13 +17,13 @@ public class ChippedModBlockEntities {
             "big", "donut", "tall", "wide"
     };
 
-    public static BlockEntityType<SpecialLanternBlockEntity> SPECIAL_LANTERN_BLOCK_ENTITY; // Non-final, initialized in register()
+    public static BlockEntityType<SpecialLanternBlockEntity> SPECIAL_LANTERN_BLOCK_ENTITY;
 
     public static List<Block> getSpecialLanternBlocks() {
         List<Block> validBlocks = new ArrayList<>();
 
         for (String variant : SPECIAL_LANTERNS) {
-            Identifier id = Identifier.of("chipped", variant + "_lantern"); // Try variant + "_iron_lantern" if this fails
+            Identifier id = Identifier.of("chipped", variant + "_lantern");
             Block block = Registries.BLOCK.get(id);
 
             if (block != Blocks.AIR) {
@@ -41,17 +41,26 @@ public class ChippedModBlockEntities {
     }
 
     public static void register() {
-        List<Block> lanternBlocks = getSpecialLanternBlocks();
-        if (lanternBlocks.isEmpty()) {
-            RealisticTorchesBT.LOGGER.error("No valid Chipped SpecialLanternBlocks found — skipping BlockEntityType registration!");
-            return;
-        }
-        SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder.create(SpecialLanternBlockEntity::new, lanternBlocks.toArray(new Block[0])).build(null);
+        SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder
+                .create(SpecialLanternBlockEntity::new) // no blocks yet
+                .build(null);
+
         Registry.register(
                 Registries.BLOCK_ENTITY_TYPE,
                 Identifier.of(RealisticTorchesBT.MOD_ID, "special_lantern_block_entity"),
                 SPECIAL_LANTERN_BLOCK_ENTITY
         );
-        RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity for Chipped mod");
+
+        RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity type (blocks will be linked later)");
+    }
+
+    public static void linkBlocks() {
+        List<Block> lanternBlocks = getSpecialLanternBlocks();
+        if (lanternBlocks.isEmpty()) {
+            RealisticTorchesBT.LOGGER.warn("No valid Chipped SpecialLanternBlocks found");
+            return;
+        }
+        lanternBlocks.forEach(block -> BlockEntityType.getId(SPECIAL_LANTERN_BLOCK_ENTITY));
+        RealisticTorchesBT.LOGGER.info("Linked {} special lantern blocks to SpecialLanternBlockEntity", lanternBlocks.size());
     }
 }

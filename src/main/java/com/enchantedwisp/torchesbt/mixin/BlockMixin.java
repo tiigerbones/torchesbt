@@ -5,6 +5,7 @@ import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -31,6 +32,10 @@ public class BlockMixin {
 
         Block block = state.getBlock();
         if (BurnableRegistry.isBurnableBlock(block) && BurnableRegistry.hasBlockEntity(block)) {
+            if (block instanceof CampfireBlock) {
+                return;
+            }
+
             if (blockEntity == null) return;
 
             long remainingBurnTime = BurnTimeUtils.getCurrentBurnTime(blockEntity);

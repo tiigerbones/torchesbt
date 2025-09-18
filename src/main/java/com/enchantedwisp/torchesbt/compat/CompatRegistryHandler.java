@@ -3,6 +3,8 @@ package com.enchantedwisp.torchesbt.compat;
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.compat.chipped.ChippedRegistryHandler;
 import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
+import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
@@ -28,14 +30,34 @@ public class CompatRegistryHandler {
         runIfModLoaded(
                 "chipped",
                 () -> {
-                    ChippedRegistryHandler.register();
-                    ChippedRegistryHandler.registerBurnables();
-                    ChippedModBlockEntities.register();
+                    ChippedRegistryHandler.register();           // blocks/items
+                    ChippedModBlockEntities.register();         // block entity type
+
+                    // Delay burnables + block linking until server is ready
+                    ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+                        // Snapshot counts before registering Chipped burnables
+                        int beforeItems = BurnableRegistry.getBurnableItemsCount();
+                        int beforeBlocks = BurnableRegistry.getBurnableBlocksCount();
+
+                        ChippedRegistryHandler.registerBurnables();
+                        ChippedModBlockEntities.linkBlocks();
+
+                        // Calculate exactly how many were added
+                        int addedItems = BurnableRegistry.getBurnableItemsCount() - beforeItems;
+                        int addedBlocks = BurnableRegistry.getBurnableBlocksCount() - beforeBlocks;
+
+                        RealisticTorchesBT.LOGGER.info(
+                                "[Compat] Chipped burnables registered: {} items, {} blocks",
+                                addedItems,
+                                addedBlocks
+                        );
+                    });
                 },
-                "registered burnable + extra compat",
+                "scheduled burnable + extra compat init",
                 "skipping chipped compat"
         );
     }
+
 
     public static void registerChippedClient() {
         runIfModLoaded(
