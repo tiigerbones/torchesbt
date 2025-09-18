@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "minecraft:torch",
     "minecraft:blaze_rod",
     "minecraft:fire_charge"
   ]
