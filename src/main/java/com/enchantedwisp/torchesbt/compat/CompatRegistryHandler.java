@@ -35,24 +35,14 @@ public class CompatRegistryHandler {
 
                     // Delay burnables + block linking until server is ready
                     ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-                        int beforeItems = BurnableRegistry.getBurnableItemsCount();
-                        int beforeBlocks = BurnableRegistry.getBurnableBlocksCount();
-
                         ChippedRegistryHandler.registerBurnables();
                         ChippedModBlockEntities.linkBlocks();
-
-                        int addedItems = BurnableRegistry.getBurnableItemsCount() - beforeItems;
-                        int addedBlocks = BurnableRegistry.getBurnableBlocksCount() - beforeBlocks;
-
-                        RealisticTorchesBT.LOGGER.info(
-                                "[Compat] Chipped burnables registered: {} items, {} blocks",
-                                addedItems,
-                                addedBlocks
-                        );
+                        BurnableRegistry.snapshotCounts("[Compat] Chipped - ");
+                        BurnableRegistry.logSource("[Compat] Chipped - ", RealisticTorchesBT.LOGGER);
                     });
                 },
-                "registered",
-                "skipping chipped compat"
+                "Registered for server startup",
+                "Skipping chipped compat"
         );
     }
 
@@ -61,8 +51,8 @@ public class CompatRegistryHandler {
         runIfModLoaded(
                 "chipped",
                 ChippedRegistryHandler::registerRenderLayers,
-                "registered render layers",
-                "skipping render layers"
+                "Registered for client",
+                "Skipping for client"
         );
     }
 }

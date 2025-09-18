@@ -33,7 +33,6 @@ public class RegistryHandler {
     public static void register() {
         registerItemGroups();
         registerUnlitGroups();
-        registerBurnables();
         RealisticTorchesBT.LOGGER.info("Registering blocks, items, and block entities for Realistic torches BT");
 
         Registry.register(Registries.BLOCK, Identifier.of(MOD_ID, "unlit_torch"), UNLIT_TORCH_BLOCK);

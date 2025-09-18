@@ -4,7 +4,6 @@ import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
-import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -47,7 +46,7 @@ public class FuelHandler {
                 BurnableRegistry.FuelType fuelType = BurnableRegistry.getFuelType(block);
 
                 if (isLit && fuelType != null && fuelType.getFuelMap().containsKey(itemId)) {
-                    long current = 0;
+                    long current;
                     long added = fuelType.getFuelMap().get(itemId) * 20L;
 
                     if (entity instanceof Burnable burnable) {

@@ -5,7 +5,6 @@ import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitLanternBlock
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitWallTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.SpecialUnlitLanternBlock;
-import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitTorchItem;
@@ -74,7 +73,7 @@ public class ChippedRegistryHandler {
             UNLIT_LANTERN_ITEMS.forEach(entries::add);
             UNLIT_TORCH_ITEMS.forEach(entries::add);
         });
-        RealisticTorchesBT.LOGGER.info("Registered {} Chipped unlit items and blocks", UNLIT_LANTERN_ITEMS.size() + UNLIT_TORCH_ITEMS.size() * 2);
+        RealisticTorchesBT.LOGGER.info("[Compat] Chipped - Registered {} Chipped unlit items and blocks", UNLIT_LANTERN_ITEMS.size() + UNLIT_TORCH_ITEMS.size() * 2);
     }
 
     private static void registerLantern(String variant, boolean isSpecial) {

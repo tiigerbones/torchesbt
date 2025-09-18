@@ -13,6 +13,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,13 +55,15 @@ public class RealisticTorchesBT implements ModInitializer {
         // Register items
         RegistryHandler.register();
         ModBlockEntities.register();
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            RegistryHandler.registerBurnables();
+            BurnableRegistry.snapshotCounts("Vanilla");
+            BurnableRegistry.logSource("Vanilla", LOGGER);
+        });
 
         // Compat Items
         CompatRegistryHandler.registerChipped();
 
-        LOGGER.info("Registered {} burnable items and {} burnable blocks",
-                BurnableRegistry.getBurnableItemsCount(),
-                BurnableRegistry.getBurnableBlocksCount());
 
         // Register Particle
         Particles.register();

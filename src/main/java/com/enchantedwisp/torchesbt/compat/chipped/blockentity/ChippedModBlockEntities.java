@@ -30,10 +30,10 @@ public class ChippedModBlockEntities {
                 if (BurnableRegistry.isBurnableBlock(block)) {
                     validBlocks.add(block);
                 } else {
-                    RealisticTorchesBT.LOGGER.warn("Chipped lantern {} found but not registered as burnable", id);
+                    RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - {} Special lantern found but not registered as burnable", id);
                 }
             } else {
-                RealisticTorchesBT.LOGGER.warn("Chipped lantern {} not found in registry", id);
+                RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - {} Special lantern not found in registry", id);
             }
         }
 
@@ -51,16 +51,16 @@ public class ChippedModBlockEntities {
                 SPECIAL_LANTERN_BLOCK_ENTITY
         );
 
-        RealisticTorchesBT.LOGGER.info("Registered SpecialLanternBlockEntity type (blocks will be linked later)");
+        RealisticTorchesBT.LOGGER.info("[Compat] Chipped - Registered Special Lantern for server startup");
     }
 
     public static void linkBlocks() {
         List<Block> lanternBlocks = getSpecialLanternBlocks();
         if (lanternBlocks.isEmpty()) {
-            RealisticTorchesBT.LOGGER.warn("No valid Chipped SpecialLanternBlocks found");
+            RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - No valid Chipped SpecialLanternBlocks found");
             return;
         }
         lanternBlocks.forEach(block -> BlockEntityType.getId(SPECIAL_LANTERN_BLOCK_ENTITY));
-        RealisticTorchesBT.LOGGER.info("Linked {} special lantern blocks to SpecialLanternBlockEntity", lanternBlocks.size());
+        RealisticTorchesBT.LOGGER.info("[Compat] Chipped - Loaded {} special lantern blocks", lanternBlocks.size());
     }
 }

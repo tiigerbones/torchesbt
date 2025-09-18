@@ -19,12 +19,54 @@ public class BurnableRegistry {
     private static final Map<Item, BurnableItemEntry> BURNABLE_ITEMS = new HashMap<>();
     private static final Map<Block, BurnableBlockEntry> BURNABLE_BLOCKS = new HashMap<>();
 
+    /**
+     * @return The total number of registered burnable items across all sources.
+     */
     public static int getBurnableItemsCount() {
         return BURNABLE_ITEMS.size();
     }
 
+    /**
+     * @return The total number of registered burnable blocks across all sources.
+     */
     public static int getBurnableBlocksCount() {
         return BURNABLE_BLOCKS.size();
+    }
+
+    /**
+     * Stores how many burnable items were registered per source (e.g., "Vanilla", "Chipped").
+     * Key = source name, Value = number of burnable items.
+     */
+    private static final Map<String, Integer> SOURCE_ITEM_COUNTS = new HashMap<>();
+
+    /**
+     * Stores how many burnable blocks were registered per source (e.g., "Vanilla", "Chipped").
+     * Key = source name, Value = number of burnable blocks.
+     */
+    private static final Map<String, Integer> SOURCE_BLOCK_COUNTS = new HashMap<>();
+
+    /**
+     * Takes a snapshot of the current burnable counts and saves them under the given source name.
+     * This allows consistent logging on later world loads, even if no new burnables were added.
+     *
+     * @param source The identifier of the source (e.g., "Vanilla", "Chipped").
+     */
+    public static void snapshotCounts(String source) {
+        SOURCE_ITEM_COUNTS.put(source, getBurnableItemsCount());
+        SOURCE_BLOCK_COUNTS.put(source, getBurnableBlocksCount());
+    }
+
+    /**
+     * Logs the number of burnables registered for the given source.
+     * If no snapshot exists for that source, defaults to 0 items/blocks.
+     *
+     * @param source The identifier of the source (e.g., "Vanilla", "Chipped").
+     * @param logger The logger instance used to print the message.
+     */
+    public static void logSource(String source, Logger logger) {
+        int items = SOURCE_ITEM_COUNTS.getOrDefault(source, 0);
+        int blocks = SOURCE_BLOCK_COUNTS.getOrDefault(source, 0);
+        logger.info("{} burnables registered: {} items, {} blocks", source, items, blocks);
     }
 
     /**
