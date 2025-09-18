@@ -39,6 +39,7 @@ public class RealisticTorchesBT implements ModInitializer {
     @Override
     public void onInitialize() {
         LOGGER.info("Initializing Realistic Torches BT");
+        OptionalResourceLoader.loadOptionalResources();
 
         // Register config
         try {
