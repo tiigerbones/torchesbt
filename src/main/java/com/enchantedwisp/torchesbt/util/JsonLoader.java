@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.registry.Registries;
@@ -31,6 +32,39 @@ public class JsonLoader {
     private static final Gson GSON = new Gson();
 
     public static void register() {
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            ResourceManager manager = server.getResourceManager();
+            LOGGER.info("Server starting, preloading fuels and igniters");
+
+            // Clear all fuel maps
+            FuelTypeAPI.clear();
+            JsonLoader.IGNITERS.clear();
+
+            // Register default fuel types
+            FuelTypeAPI.FuelType torchFuel = FuelTypeAPI.registerFuelType(new Identifier("torchesbt", "torch"));
+            FuelTypeAPI.FuelType lanternFuel = FuelTypeAPI.registerFuelType(new Identifier("torchesbt", "lantern"));
+            FuelTypeAPI.FuelType campfireFuel = FuelTypeAPI.registerFuelType(new Identifier("torchesbt", "campfire"));
+
+            // Load JSONs into default fuel types
+            loadJsonFiles(manager, "ignite", IGNITERS, "ignite_amount");
+            loadJsonFiles(manager, "fuel/torch", torchFuel.getFuelMap(), "add_time");
+            loadJsonFiles(manager, "fuel/lantern", lanternFuel.getFuelMap(), "add_time");
+            loadJsonFiles(manager, "fuel/campfire", campfireFuel.getFuelMap(), "add_time");
+
+            // Load custom fuel types dynamically
+            for (Identifier fuelTypeId : FuelTypeAPI.getFuelTypeIds()) {
+                if (!fuelTypeId.getNamespace().equals("torchesbt")) {
+                    loadJsonFiles(manager,
+                            "fuel/" + fuelTypeId.getPath(),
+                            FuelTypeAPI.getFuelType(fuelTypeId).getFuelMap(),
+                            "add_time");
+                }
+            }
+
+            LOGGER.info("All fuels and igniters loaded on server start");
+        });
+
         ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
             private final Identifier RELOAD_ID = new Identifier("torchesbt", "json_loader");
 

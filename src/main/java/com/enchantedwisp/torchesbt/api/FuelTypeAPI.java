@@ -131,7 +131,9 @@ public class FuelTypeAPI {
      * Useful for datapack/resource reloads.
      */
     public static void clear() {
-        FUEL_TYPES.clear();
-        LOGGER.info("Cleared all registered fuel types");
+        for (FuelType type : FUEL_TYPES.values()) {
+            type.getFuelMap().clear();
+        }
+        LOGGER.info("Cleared all fuel type contents");
     }
 }
