@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.registry;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitLanternBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitTorchBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitWallTorchBlock;
@@ -57,6 +58,10 @@ public class RegistryHandler {
     }
 
     public static void registerBurnables() {
+        FuelTypeAPI.FuelType torchFuel = FuelTypeAPI.getFuelType(new Identifier("torchesbt", "torch"));
+        FuelTypeAPI.FuelType lanternFuel = FuelTypeAPI.getFuelType(new Identifier("torchesbt", "lantern"));
+        FuelTypeAPI.FuelType campfireFuel = FuelTypeAPI.getFuelType(new Identifier("torchesbt", "campfire"));
+
         BurnableRegistry.registerBurnableItem(
                 Items.TORCH,
                 RegistryHandler.UNLIT_TORCH,
@@ -78,7 +83,7 @@ public class RegistryHandler {
                 ConfigCache.getRainTorchMultiplier(),
                 ConfigCache.getWaterTorchMultiplier(),
                 true,
-                BurnableRegistry.FuelType.TORCH_FUELS
+                torchFuel
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.WALL_TORCH,
@@ -87,7 +92,7 @@ public class RegistryHandler {
                 ConfigCache.getRainTorchMultiplier(),
                 ConfigCache.getWaterTorchMultiplier(),
                 true,
-                BurnableRegistry.FuelType.TORCH_FUELS
+                torchFuel
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.LANTERN,
@@ -96,7 +101,7 @@ public class RegistryHandler {
                 ConfigCache.getRainLanternMultiplier(),
                 ConfigCache.getWaterLanternMultiplier(),
                 true,
-                BurnableRegistry.FuelType.LANTERN_FUELS
+                lanternFuel
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.CAMPFIRE,
@@ -105,7 +110,7 @@ public class RegistryHandler {
                 ConfigCache.getRainCampfireMultiplier(),
                 ConfigCache.getWaterCampfireMultiplier(),
                 true,
-                BurnableRegistry.FuelType.CAMPFIRE_FUELS
+                campfireFuel
         );
     }
 

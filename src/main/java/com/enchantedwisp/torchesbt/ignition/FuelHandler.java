@@ -4,6 +4,7 @@ import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.Burnable;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -18,9 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import org.slf4j.Logger;
 
 /**
- * Handles fueling of burnable blocks using defined fuel items.
- *
- * <p>Fuels are defined in the fuel maps referenced by {@link BurnableRegistry.FuelType}.</p>
+ * Handles fueling of burnable blocks using FuelTypeAPI fuel types.
  */
 public class FuelHandler {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
@@ -43,11 +42,11 @@ public class FuelHandler {
             if (BurnableRegistry.isBurnableBlock(block)) {
                 boolean isCampfire = block == Blocks.CAMPFIRE;
                 boolean isLit = isCampfire ? world.getBlockState(pos).get(CampfireBlock.LIT) : true;
-                BurnableRegistry.FuelType fuelType = BurnableRegistry.getFuelType(block);
 
+                FuelTypeAPI.FuelType fuelType = BurnableRegistry.getFuelType(block);
                 if (isLit && fuelType != null && fuelType.getFuelMap().containsKey(itemId)) {
                     long current;
-                    long added = fuelType.getFuelMap().get(itemId) * 20L;
+                    long added = FuelTypeAPI.getFuelBurnTime(fuelType, itemId);
 
                     if (entity instanceof Burnable burnable) {
                         current = burnable.getRemainingBurnTime();
@@ -62,7 +61,8 @@ public class FuelHandler {
 
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
                     ReignitionHandler.consumeFuel(stack, player, hand);
-                    LOGGER.debug("Fueled block {} at {} by {} using {}, {} -> {}", block, pos, player.getName().getString(), stack.getItem(), current, current + added);
+                    LOGGER.debug("Fueled block {} at {} by {} using {}, {} -> {}",
+                            block, pos, player.getName().getString(), stack.getItem(), current, current + added);
                     return ActionResult.SUCCESS;
                 }
             }

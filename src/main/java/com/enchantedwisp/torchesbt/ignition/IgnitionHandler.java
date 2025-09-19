@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.ignition;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.api.IgnitionEvents;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
@@ -23,15 +24,14 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 
-import java.util.Objects;
 
 /**
  * Handles ignition of unlit torches, lanterns, and campfires using defined igniter items.
+ * Fires IgnitionEvents to allow external mods to cancel or modify ignition burn times.
  *
  * <p>Igniters are defined in {@link JsonLoader#IGNITERS}.</p>
  */
@@ -46,28 +46,33 @@ public class IgnitionHandler {
             Identifier itemId = Registries.ITEM.getId(stack.getItem());
             Identifier offHandItemId = Registries.ITEM.getId(offHandStack.getItem());
 
-            // Check if the off-hand item is an igniter and the main hand item is an unlit burnable
             if (JsonLoader.IGNITERS.containsKey(offHandItemId)) {
                 Item litItem = BurnableRegistry.getLitItem(stack.getItem());
                 if (litItem != null) {
-                    return igniteItem(world, hand, stack, offHandStack, litItem, stack.getItem(), player);
+                    IgnitionEvents.ItemContext itemContext = new IgnitionEvents.ItemContext(player, hand, stack, offHandStack, JsonLoader.IGNITERS.get(offHandItemId) * 20L);
+                    ActionResult itemResult = IgnitionEvents.ITEM.invoker().onIgnite(itemContext);
+                    if (itemResult == ActionResult.FAIL) {
+                        return TypedActionResult.fail(stack);
+                    }
+                    return igniteItem(world, hand, stack, offHandStack, litItem, stack.getItem(), player, itemContext.getProposedBurnTime());
                 }
             }
 
-            // Check if the main hand item is an igniter and the off-hand item is an unlit burnable
             if (JsonLoader.IGNITERS.containsKey(itemId)) {
                 Item litItem = BurnableRegistry.getLitItem(offHandStack.getItem());
                 if (litItem != null) {
-                    return igniteItem(world,
-                            hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND,
-                            offHandStack, stack, litItem, offHandStack.getItem(), player);
+                    IgnitionEvents.ItemContext itemContext = new IgnitionEvents.ItemContext(player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND, offHandStack, stack, JsonLoader.IGNITERS.get(itemId) * 20L);
+                    ActionResult itemResult = IgnitionEvents.ITEM.invoker().onIgnite(itemContext);
+                    if (itemResult == ActionResult.FAIL) {
+                        return TypedActionResult.fail(stack);
+                    }
+                    return igniteItem(world, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND, offHandStack, stack, litItem, offHandStack.getItem(), player, itemContext.getProposedBurnTime());
                 }
             }
 
             return TypedActionResult.pass(stack);
         });
 
-        // Block ignition (e.g., unlit campfire)
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             if (world.isClient) return ActionResult.PASS;
 
@@ -78,13 +83,19 @@ public class IgnitionHandler {
             Block litBlock = BurnableRegistry.getLitBlock(state.getBlock());
 
             if (JsonLoader.IGNITERS.containsKey(itemId) && litBlock != null) {
+                IgnitionEvents.BlockContext blockContext = new IgnitionEvents.BlockContext(player, hand, world, pos, stack, JsonLoader.IGNITERS.get(itemId) * 20L);
+                ActionResult blockResult = IgnitionEvents.BLOCK.invoker().onIgnite(blockContext);
+                if (blockResult == ActionResult.FAIL) {
+                    return ActionResult.FAIL;
+                }
+                long finalBurnTime = blockContext.getProposedBurnTime();
+
                 if (litBlock == Blocks.CAMPFIRE && !state.get(CampfireBlock.LIT)) {
-                    long igniteTicks = JsonLoader.IGNITERS.get(itemId) * 20L;
                     world.setBlockState(pos, state.with(CampfireBlock.LIT, true), 3);
                     ICampfireBurnAccessor accessor = (ICampfireBurnAccessor) world.getBlockEntity(pos);
                     if (accessor != null) {
-                        accessor.torchesbt_setBurnTime(igniteTicks);
-                        LOGGER.debug("Ignited campfire at {} with burn time {}", pos, igniteTicks);
+                        accessor.torchesbt_setBurnTime(finalBurnTime);
+                        LOGGER.debug("Ignited campfire at {} with burn time {}", pos, finalBurnTime);
                     }
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
                     ReignitionHandler.consumeIgniter(stack, player, hand);
@@ -93,7 +104,7 @@ public class IgnitionHandler {
                     BlockState newState = copyProperties(state, litBlock.getDefaultState());
                     world.setBlockState(pos, newState, 3);
                     BurnTimeManager.setBurnTimeOnPlacement(world, pos, world.getBlockEntity(pos),
-                            stack, JsonLoader.IGNITERS.get(itemId) * 20L);
+                            stack, finalBurnTime);
                     world.playSound(null, pos, SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);
                     ReignitionHandler.consumeIgniter(stack, player, hand);
                     LOGGER.debug("Ignited block {} at {} using {}", litBlock, pos, stack.getItem());
@@ -106,15 +117,12 @@ public class IgnitionHandler {
     }
 
     private static TypedActionResult<ItemStack> igniteItem(World world, Hand hand, ItemStack stack, ItemStack igniter,
-                                                          Item litItem, Item unlitItem, PlayerEntity player) {
+                                                           Item litItem, Item unlitItem, PlayerEntity player, long finalBurnTime) {
         if (world.isClient) return TypedActionResult.pass(stack);
-
-        Identifier igniterId = Registries.ITEM.getId(igniter.getItem());
-        long igniteTicks = JsonLoader.IGNITERS.get(igniterId) * 20L;  // Get from JSON, convert to ticks
 
         int stackCount = stack.getCount();
         ItemStack newStack = new ItemStack(litItem, 1);
-        BurnTimeUtils.setCurrentBurnTime(newStack, igniteTicks);  // Set to JSON amount instead of init (max)
+        BurnTimeUtils.setCurrentBurnTime(newStack, finalBurnTime);  // Use event-modified burn time
         player.setStackInHand(hand, newStack);
         ReignitionHandler.consumeIgniter(igniter, player, hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND);
         player.playSound(SoundEvents.ITEM_FLINTANDSTEEL_USE, SoundCategory.BLOCKS, 1, 1);

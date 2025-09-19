@@ -1,23 +1,39 @@
 package com.enchantedwisp.torchesbt.registry;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.util.JsonLoader;
+import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Centralized registry for managing burnable items and blocks, their lit/unlit states, and properties.
+ * Centralized registry for managing burnable items and blocks, their lit/unlit states, and burn properties.
+ * <p>
+ * This registry serves as the authoritative source for querying and registering burnables.
+ * Both items and blocks can be registered with their burn duration, environmental multipliers,
+ * and in the case of blocks, their fuel type and block entity support.
+ * </p>
+ * <p>
+ * Registered entries are stored in-memory and can be queried at runtime to determine
+ * whether an item or block is burnable, how long it should last, and how its burn time
+ * is affected by rain or water.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> Re-registering the same lit item/block will overwrite the previous entry.
+ * </p>
  */
 public class BurnableRegistry {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
+
     private static final Map<Item, BurnableItemEntry> BURNABLE_ITEMS = new HashMap<>();
     private static final Map<Block, BurnableBlockEntry> BURNABLE_BLOCKS = new HashMap<>();
+
+    private static final Map<String, Integer> SOURCE_ITEM_COUNTS = new HashMap<>();
+    private static final Map<String, Integer> SOURCE_BLOCK_COUNTS = new HashMap<>();
 
     /**
      * @return The total number of registered burnable items across all sources.
@@ -34,20 +50,7 @@ public class BurnableRegistry {
     }
 
     /**
-     * Stores how many burnable items were registered per source (e.g., "Vanilla", "Chipped").
-     * Key = source name, Value = number of burnable items.
-     */
-    private static final Map<String, Integer> SOURCE_ITEM_COUNTS = new HashMap<>();
-
-    /**
-     * Stores how many burnable blocks were registered per source (e.g., "Vanilla", "Chipped").
-     * Key = source name, Value = number of burnable blocks.
-     */
-    private static final Map<String, Integer> SOURCE_BLOCK_COUNTS = new HashMap<>();
-
-    /**
      * Takes a snapshot of the current burnable counts and saves them under the given source name.
-     * This allows consistent logging on later world loads, even if no new burnables were added.
      *
      * @param source The identifier of the source (e.g., "Vanilla", "Chipped").
      */
@@ -72,13 +75,14 @@ public class BurnableRegistry {
     /**
      * Registers a burnable item with its properties.
      *
-     * @param litItem        The item in its lit state.
-     * @param unlitItem      The item in its unlit state.
-     * @param burnTime       The duration the item burns for (in ticks).
-     * @param rainMultiplier The multiplier applied to burn time in rain.
-     * @param waterMultiplier The multiplier applied to burn time when underwater.
+     * @param litItem         the item in its lit state
+     * @param unlitItem       the item in its unlit state
+     * @param burnTime        duration the item burns for (in ticks)
+     * @param rainMultiplier  multiplier applied when exposed to rain
+     * @param waterMultiplier multiplier applied when submerged in water
      */
-    public static void registerBurnableItem(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {
+    public static void registerBurnableItem(Item litItem, Item unlitItem,
+                                             long burnTime, double rainMultiplier, double waterMultiplier) {
         BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier, waterMultiplier));
         LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
     }
@@ -86,13 +90,13 @@ public class BurnableRegistry {
     /**
      * Registers a burnable block with its properties and fuel type.
      *
-     * @param litBlock       The block in its lit state.
-     * @param unlitBlock     The block in its unlit state.
-     * @param burnTime       The duration the block burns for (in ticks).
-     * @param rainMultiplier The multiplier applied to burn time in rain.
-     * @param waterMultiplier The multiplier applied to burn time when underwater.
-     * @param hasBlockEntity Whether the block has a block entity.
-     * @param fuelType       The type of fuel used by the block.
+     * @param litBlock        the block in its lit state
+     * @param unlitBlock      the block in its unlit state
+     * @param burnTime        duration the block burns for (in ticks)
+     * @param rainMultiplier  multiplier applied when exposed to rain
+     * @param waterMultiplier multiplier applied when submerged in water
+     * @param hasBlockEntity  whether the block has a block entity
+     * @param fuelType        the type of fuel used by the block
      */
     public static void registerBurnableBlock(
             Block litBlock,
@@ -101,21 +105,21 @@ public class BurnableRegistry {
             double rainMultiplier,
             double waterMultiplier,
             boolean hasBlockEntity,
-            FuelType fuelType
+            FuelTypeAPI.FuelType fuelType
     ) {
-        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(litBlock, unlitBlock, burnTime, rainMultiplier, waterMultiplier, hasBlockEntity, fuelType));
-        LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})", Registries.BLOCK.getId(litBlock), Registries.BLOCK.getId(unlitBlock), fuelType);
+        BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(
+                litBlock, unlitBlock, burnTime, rainMultiplier, waterMultiplier, hasBlockEntity, fuelType
+        ));
+        LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})",
+                Registries.BLOCK.getId(litBlock),
+                Registries.BLOCK.getId(unlitBlock),
+                fuelType != null ? fuelType.getId() : "null"
+        );
     }
 
-    public static boolean isBurnableItem(
-            Item item
-    ) {
-        return BURNABLE_ITEMS.containsKey(item);
-    }
-
-    public static boolean isBurnableBlock(Block block) {
-        return BURNABLE_BLOCKS.containsKey(block);
-    }
+    // --- Query Methods ---
+    public static boolean isBurnableItem(Item item) { return BURNABLE_ITEMS.containsKey(item); }
+    public static boolean isBurnableBlock(Block block) { return BURNABLE_BLOCKS.containsKey(block); }
 
     public static Item getUnlitItem(Item litItem) {
         BurnableItemEntry entry = BURNABLE_ITEMS.get(litItem);
@@ -178,73 +182,14 @@ public class BurnableRegistry {
         return entry != null && entry.hasBlockEntity();
     }
 
-    public static FuelType getFuelType(Block block) {
+    public static FuelTypeAPI.FuelType getFuelType(Block block) {
         BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
         return entry != null ? entry.fuelType() : null;
     }
 
-    /**
-     * Enum to represent the type of fuel used by a burnable block.
-     */
-    public enum FuelType {
-        CAMPFIRE_FUELS(JsonLoader.CAMPFIRE_FUELS),
-        LANTERN_FUELS(JsonLoader.LANTERN_FUELS),
-        TORCH_FUELS(JsonLoader.TORCH_FUELS);
+    /** Record representing a burnable item and its properties */
+    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {}
 
-        /**
-         * Map of fuel items to their burn times.
-         */
-        private final Map<Identifier, Integer> fuelMap;
-
-        /**
-         * Constructs a FuelType with the specified fuel map.
-         *
-         * @param fuelMap The map of fuel items to their burn times.
-         */
-        FuelType(Map<Identifier, Integer> fuelMap) {
-            this.fuelMap = fuelMap;
-        }
-
-        /**
-         * Retrieves the fuel map associated with this fuel type.
-         *
-         * @return The map of fuel items to their burn times.
-         */
-        public Map<Identifier, Integer> getFuelMap() {
-            return fuelMap;
-        }
-    }
-
-    /**
-     * Record representing a burnable item with its properties.
-     *
-     * @param litItem        The item in its lit state.
-     * @param unlitItem      The item in its unlit state.
-     * @param burnTime       The duration the item burns for (in ticks).
-     * @param rainMultiplier The multiplier applied to burn time in rain.
-     * @param waterMultiplier The multiplier applied to burn time when underwater.
-     */
-    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {
-    }
-
-    /**
-     * Record representing a burnable block with its properties and fuel type.
-     *
-     * @param litBlock       The block in its lit state.
-     * @param unlitBlock     The block in its unlit state.
-     * @param burnTime       The duration the block burns for (in ticks).
-     * @param rainMultiplier The multiplier applied to burn time in rain.
-     * @param waterMultiplier The multiplier applied to burn time when underwater.
-     * @param hasBlockEntity Whether the block has a block entity.
-     * @param fuelType       The type of fuel used by the block.
-     */
-    public record BurnableBlockEntry(
-            Block litBlock,
-            Block unlitBlock,
-            long burnTime,
-            double rainMultiplier,
-            double waterMultiplier,
-            boolean hasBlockEntity,
-            FuelType fuelType) {
-    }
+    /** Record representing a burnable block and its properties */
+    public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, double waterMultiplier, boolean hasBlockEntity, FuelTypeAPI.FuelType fuelType) {}
 }

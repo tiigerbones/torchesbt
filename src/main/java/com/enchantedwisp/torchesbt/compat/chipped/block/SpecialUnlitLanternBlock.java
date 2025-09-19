@@ -20,7 +20,6 @@ public class SpecialUnlitLanternBlock extends Block implements Waterloggable {
     public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
     public static final BooleanProperty HANGING = Properties.HANGING;
     public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
-    // Example shapes (can be replaced with your custom lantern voxel shapes)
     public static final VoxelShape DEFAULT_EAST_SHAPE = Block.createCuboidShape(5.0D, 0.0D, 1.0D, 11.0D, 15.0D, 15.0D);
     public static final VoxelShape DEFAULT_NORTH_SHAPE = Block.createCuboidShape(1.0D, 0.0D, 5.0D, 15.0D, 15.0D, 11.0D);
     private final VoxelShape toEast;

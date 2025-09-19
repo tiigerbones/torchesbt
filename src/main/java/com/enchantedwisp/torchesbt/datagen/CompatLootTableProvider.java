@@ -13,7 +13,7 @@ import net.minecraft.loot.provider.number.ConstantLootNumberProvider;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
 
-@SuppressWarnings("unstable")
+@SuppressWarnings("UnstableApiUsage")
 public class CompatLootTableProvider extends FabricBlockLootTableProvider {
 
     private static final String[] CHIPPED_LANTERNS = {

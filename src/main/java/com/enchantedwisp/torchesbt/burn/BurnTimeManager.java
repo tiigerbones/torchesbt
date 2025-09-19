@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.api.BurnTickEvents;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
@@ -28,6 +29,7 @@ import static com.enchantedwisp.torchesbt.ignition.IgnitionHandler.copyPropertie
 /**
  * Handles burn time ticking for player-held items, nearby dropped items, and burnable blocks.
  * Only ticks items when Dynamic Lights is enabled.
+ * Fires BurnTickEvents to allow external mods to modify burn time decrements.
  */
 public class BurnTimeManager {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
@@ -82,7 +84,11 @@ public class BurnTimeManager {
                 if (isSubmerged && waterMult > 0.0) {  // Ignore if <=0
                     effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
                 }
-                burnTime -= (long) Math.ceil(effectiveMultiplier);
+                // Fire event to allow mods to modify decrement
+                long baseDecrement = (long) Math.ceil(effectiveMultiplier);
+                BurnTickEvents.PlayerHeldContext heldContext = new BurnTickEvents.PlayerHeldContext(player, stack, baseDecrement);
+                long finalDecrement = BurnTickEvents.PLAYER_HELD.invoker().onTick(heldContext, baseDecrement);
+                burnTime -= finalDecrement;
             }
 
             BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
@@ -134,7 +140,7 @@ public class BurnTimeManager {
                 continue;
             }
 
-            boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
+            boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, itemEntity.getBlockPos());
             boolean isSubmerged = itemEntity.isSubmergedIn(FluidTags.WATER);
             double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
             double waterMult = BurnableRegistry.getWaterMultiplier(stack.getItem());
@@ -150,7 +156,11 @@ public class BurnTimeManager {
                 if (isSubmerged && waterMult > 0.0) {
                     effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
                 }
-                burnTime -= (long) Math.ceil(effectiveMultiplier);
+                // Fire event to allow mods to modify decrement
+                long baseDecrement = (long) Math.ceil(effectiveMultiplier);
+                BurnTickEvents.DroppedItemContext itemContext = new BurnTickEvents.DroppedItemContext(itemEntity, stack, baseDecrement);
+                long finalDecrement = BurnTickEvents.DROPPED_ITEM.invoker().onTick(itemContext, baseDecrement);
+                burnTime -= finalDecrement;
             }
 
             BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
@@ -158,6 +168,7 @@ public class BurnTimeManager {
 
             if (burnTime <= 0) {
                 ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
+                itemEntity.setStack(unlit);
             }
         }
     }
@@ -173,7 +184,13 @@ public class BurnTimeManager {
             }
             return;
         }
-        burnable.tickBurn(world, true);
+        // Fire event to allow mods to modify decrement
+        long baseDecrement = (long) Math.ceil(burnable.getRainMultiplier() * (BurnTimeUtils.isActuallyRainingAt(world, pos) ? 1.0 : 0.0)
+                + burnable.getWaterMultiplier() * (world.getFluidState(pos).isIn(FluidTags.WATER) ? 1.0 : 0.0));
+        if (baseDecrement == 0) baseDecrement = 1; // Default tick
+        BurnTickEvents.BlockContext blockContext = new BurnTickEvents.BlockContext(world, pos, baseDecrement);
+        long finalDecrement = BurnTickEvents.BLOCK.invoker().onTick(blockContext, baseDecrement);
+        burnable.setRemainingBurnTime(burnTime - finalDecrement);
     }
 
     private static void tickCampfire(World world, BlockPos pos, BlockState state, ICampfireBurnAccessor campfire) {
@@ -196,7 +213,11 @@ public class BurnTimeManager {
                 if (isSubmerged && waterMult > 0.0) {
                     effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
                 }
-                burnTime -= (long) Math.ceil(effectiveMultiplier);
+                // Fire event to allow mods to modify decrement
+                long baseDecrement = (long) Math.ceil(effectiveMultiplier);
+                BurnTickEvents.BlockContext blockContext = new BurnTickEvents.BlockContext(world, pos, baseDecrement);
+                long finalDecrement = BurnTickEvents.BLOCK.invoker().onTick(blockContext, baseDecrement);
+                burnTime -= finalDecrement;
             }
             campfire.torchesbt_setBurnTime(Math.max(0, burnTime));
         }

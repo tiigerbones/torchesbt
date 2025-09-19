@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.compat.chipped;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitLanternBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitWallTorchBlock;
@@ -152,6 +153,9 @@ public class ChippedRegistryHandler {
     }
 
     public static void registerBurnables() {
+        FuelTypeAPI.FuelType torchFuel = FuelTypeAPI.getFuelType(new Identifier("torchesbt", "torch"));
+        FuelTypeAPI.FuelType lanternFuel = FuelTypeAPI.getFuelType(new Identifier("torchesbt", "lantern"));
+
         for (String variant : CHIPPED_LANTERNS) {
             Item litItem = Registries.ITEM.get(Identifier.of("chipped", variant + "_lantern"));
             Item unlitItem = Registries.ITEM.get(Identifier.of(RealisticTorchesBT.MOD_ID, "chipped/unlit_" + variant + "_lantern"));
@@ -171,7 +175,7 @@ public class ChippedRegistryHandler {
                     ConfigCache.getRainLanternMultiplier(),
                     ConfigCache.getWaterLanternMultiplier(),
                     true,
-                    BurnableRegistry.FuelType.LANTERN_FUELS
+                    lanternFuel
             );
             RealisticTorchesBT.LOGGER.debug(
                     "Registered Chipped lantern: {} (unlit block: {}, unlit item: {})",
@@ -199,7 +203,7 @@ public class ChippedRegistryHandler {
                     ConfigCache.getRainLanternMultiplier(),
                     ConfigCache.getWaterLanternMultiplier(),
                     true,
-                    BurnableRegistry.FuelType.LANTERN_FUELS
+                    lanternFuel
             );
             RealisticTorchesBT.LOGGER.debug(
                     "Registered Chipped special lantern: {} (unlit block: {}, unlit item: {})",
@@ -229,7 +233,7 @@ public class ChippedRegistryHandler {
                     ConfigCache.getRainTorchMultiplier(),
                     ConfigCache.getWaterTorchMultiplier(),
                     true,
-                    BurnableRegistry.FuelType.TORCH_FUELS
+                    torchFuel
             );
             BurnableRegistry.registerBurnableBlock(
                     litWallTorchBlock,
@@ -238,7 +242,7 @@ public class ChippedRegistryHandler {
                     ConfigCache.getRainTorchMultiplier(),
                     ConfigCache.getWaterTorchMultiplier(),
                     true,
-                    BurnableRegistry.FuelType.TORCH_FUELS
+                    torchFuel
             );
             RealisticTorchesBT.LOGGER.debug(
                     "Registered Chipped torch: {} (unlit torch: {}, unlit wall torch: {}, unlit item: {})",

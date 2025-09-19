@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 
 import java.util.concurrent.CompletableFuture;
 
-@SuppressWarnings("unstable")
+@SuppressWarnings("UnstableApiUsage")
 public class CompatBlockTagProvider extends FabricTagProvider.BlockTagProvider {
     private static final String[] CHIPPED_LANTERNS = {
             "blue_paper", "burning_coal", "checkered_iron", "dark_blue_paper", "ender",
