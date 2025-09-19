@@ -4,6 +4,7 @@ import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
 import com.enchantedwisp.torchesbt.compat.CompatResourceLoader;
+import com.enchantedwisp.torchesbt.ignition.FuelTypeLoader;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
@@ -54,6 +55,9 @@ public class RealisticTorchesBT implements ModInitializer {
         // Initialize ConfigCache
         ConfigCache.initialize();
 
+        // Fuels
+        FuelTypeLoader.register();
+
         // Register items
         RegistryHandler.register();
         ModBlockEntities.register();
@@ -74,8 +78,5 @@ public class RealisticTorchesBT implements ModInitializer {
         // Burntime
         ReignitionHandler.register();
         BurnTimeManager.register();
-
-        // Json
-        JsonLoader.register();
     }
 }
