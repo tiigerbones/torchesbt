@@ -41,6 +41,8 @@
 	"suggests": {
       "lambdynlights": "*",
       "sodiumdynamiclights": "*",
+      "trinkets": "*",
+      "jade": "*",
       "chipped": "*"
     }
 }

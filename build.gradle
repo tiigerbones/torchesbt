@@ -51,20 +51,16 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation  "maven.modrinth:jade:11.13.1+fabric"
+    modImplementation  "maven.modrinth:jade:${project.jade_version}"
 
 	modApi("dev.emi:trinkets:${project.trinkets_version}")
-
-	modApi "com.terraformersmc:modmenu:7.2.2"
 
 	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 
-	// For testing
-    modImplementation("maven.modrinth:athena-ctm:${project.athena_version}")
-    modImplementation "com.teamresourceful.resourcefullib:resourcefullib-fabric-1.20.1:2.1.29"
-    modImplementation("maven.modrinth:chipped:${project.chipped_version}")
+	// Testing/Compat
+    modImplementation "earth.terrarium.chipped:chipped-${modLoader}-${minecraft_version}:${chipped_version}"
 	modLocalRuntime("maven.modrinth:trinkets:${project.trinkets_version}")
 	modLocalRuntime "maven.modrinth:emi:1.1.22+1.20.1+fabric"
 }
