@@ -42,7 +42,6 @@ public class FuelTypeLoader {
 
             // Load custom fuels
             CustomFuelTypes.load(manager);
-
             LOGGER.info("Finished loading all fuels and igniters");
         });
 

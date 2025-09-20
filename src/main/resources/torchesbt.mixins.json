@@ -5,6 +5,7 @@
   "mixins": [
     "BlockMixin",
     "CampfireBlockEntityMixin",
+    "CampfireBlockMixin",
     "ItemMixin",
     "ItemStackMixin",
     "LanternBlockMixin",

@@ -4,6 +4,8 @@ import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.registry.blocks.FlameLevel;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.block.entity.BlockEntity;
@@ -37,16 +39,31 @@ public abstract class CampfireBlockEntityMixin extends BlockEntity implements IC
 
     @Override
     public void torchesbt_setBurnTime(long time) {
-        this.torchesbt_burnTime = Math.max(0, Math.min(time, BurnableRegistry.getBurnTime(getCachedState().getBlock())));
+        long max = BurnableRegistry.getBurnTime(getCachedState().getBlock());
+        this.torchesbt_burnTime = Math.max(0, Math.min(time, max));
         markDirty();
-        if (world != null && !world.isClient && torchesbt_burnTime > 0 && !getCachedState().get(CampfireBlock.LIT)) {
-            world.setBlockState(pos, getCachedState().with(CampfireBlock.LIT, true), 3);
-            RealisticTorchesBT.LOGGER.debug("Set campfire at {} to LIT with burn time {}", pos, torchesbt_burnTime);
-        } else if (world != null && !world.isClient && torchesbt_burnTime <= 0 && getCachedState().get(CampfireBlock.LIT)) {
-            world.setBlockState(pos, getCachedState().with(CampfireBlock.LIT, false), 3);
-            RealisticTorchesBT.LOGGER.debug("Set campfire at {} to unlit due to zero burn time", pos);
+
+        if (world != null && !world.isClient) {
+            BlockState state = getCachedState();
+
+            // Decide flame level
+            FlameLevel level = FlameLevel.LOW;
+            double pct = (double) this.torchesbt_burnTime / max;
+            if (pct > 0.50) {
+                level = FlameLevel.FULL;
+            } else if (pct > 0.20) {
+                level = FlameLevel.MID;
+            }
+
+            world.setBlockState(
+                    pos,
+                    state.with(CampfireBlock.LIT, this.torchesbt_burnTime > 0)
+                            .with(FlameLevel.PROPERTY, level),
+                    Block.NOTIFY_ALL
+            );
         }
     }
+
 
     @Override
     public DefaultedList<ItemStack> torchesbt_getItems() {

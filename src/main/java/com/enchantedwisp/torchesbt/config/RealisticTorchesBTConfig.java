@@ -25,26 +25,26 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
     public int campfireBurnTime = 100;
 
-    @Comment("If true, rain affects burnout (torches/campfires/lanterns: faster). Default: true")
+    @Comment("If true, rain affects burn time on burnables. Default: true")
     @ConfigEntry.Gui.PrefixText
     public boolean enableRainExtinguish = true;
 
-    @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster) Max: 10.0x")
-    public double rainTorchMultiplier = 10.0;
+    @Comment("Burn time multiplier for torches in rain. Default: 10.0 (10x faster) Max: 10x")
+    public double rainTorchMultiplier = 10;
 
-    @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster) Max: 10.0x")
+    @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster) Max: 10x")
     public double rainCampfireMultiplier = 8.5;
 
-    @Comment("Burn time multiplier for lanterns in rain. Default: 4.5 (4.5x faster) Max: 10.0x")
+    @Comment("Burn time multiplier for lanterns in rain. Default: 4.5 (4.5x faster) Max: 10x")
     public double rainLanternMultiplier = 4.5;
 
-    @Comment("Burn time multiplier for torches in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
+    @Comment("Burn time multiplier for torches in water. Default: 7.5 (7.5x faster) Max: 10x instant extinguish")
     public double waterTorchMultiplier = 10;
 
-    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
+    @Comment("Burn time multiplier for lanterns in water. Default: 7.5 (7.5x faster) Max: 10x instant extinguish")
     public double waterLanternMultiplier = 7.5;
 
-    @Comment("Burn time multiplier for campfires in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
+    @Comment("Burn time multiplier for campfires in water. Default: 7.5 (7.5x faster) Max: 10x instant extinguish")
     public double waterCampfireMultiplier = 10;
 
     @Override

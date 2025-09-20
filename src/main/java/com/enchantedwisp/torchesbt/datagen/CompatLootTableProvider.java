@@ -15,7 +15,6 @@ import net.minecraft.util.Identifier;
 
 @SuppressWarnings("UnstableApiUsage")
 public class CompatLootTableProvider extends FabricBlockLootTableProvider {
-
     private static final String[] CHIPPED_LANTERNS = {
             "blue_paper", "burning_coal", "checkered_iron", "dark_blue_paper",
             "ender", "green_paper", "iron_bowl", "purple_paper",

@@ -21,7 +21,6 @@ public class ModLootTableProvider extends FabricBlockLootTableProvider {
 
     @Override
     public void generate() {
-        // Loot tables for your mod’s vanilla-style unlit blocks
         addDrop(RegistryHandler.UNLIT_TORCH_BLOCK, RegistryHandler.UNLIT_TORCH);
         addDrop(RegistryHandler.UNLIT_WALL_TORCH_BLOCK, RegistryHandler.UNLIT_TORCH);
         addDrop(RegistryHandler.UNLIT_LANTERN_BLOCK, RegistryHandler.UNLIT_LANTERN);

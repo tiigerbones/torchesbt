@@ -16,6 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Hand;
+import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -192,7 +193,6 @@ public class BurnTimeManager {
         long finalDecrement = BurnTickEvents.BLOCK.invoker().onTick(blockContext, baseDecrement);
         burnable.setRemainingBurnTime(burnTime - finalDecrement);
     }
-
     private static void tickCampfire(World world, BlockPos pos, BlockState state, ICampfireBurnAccessor campfire) {
         long burnTime = campfire.torchesbt_getBurnTime();
 
