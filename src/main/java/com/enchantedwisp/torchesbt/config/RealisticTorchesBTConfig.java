@@ -35,8 +35,8 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @Comment("Burn time multiplier for campfires in rain. Default: 8.5 (8.5x faster) Max: 10.0x")
     public double rainCampfireMultiplier = 8.5;
 
-    @Comment("Burn time multiplier for lanterns in rain. Default: 6.5 (6.5x faster) Max: 10.0x")
-    public double rainLanternMultiplier = 6.5;
+    @Comment("Burn time multiplier for lanterns in rain. Default: 4.5 (4.5x faster) Max: 10.0x")
+    public double rainLanternMultiplier = 4.5;
 
     @Comment("Burn time multiplier for torches in water. Default: 7.5 (7.5x faster) Max: 10.0x instant extinguish")
     public double waterTorchMultiplier = 10;
@@ -49,6 +49,15 @@ public class RealisticTorchesBTConfig implements ConfigData {
 
     @Override
     public void validatePostLoad() {
+        // Clamp BurnTime
+        if (lanternBurnTime < 5 || lanternBurnTime > 3600) {
+            RealisticTorchesBT.LOGGER.warn("Correcting torchBurnTime: {} to {}. Must be between 5 and 3600", lanternBurnTime, Math.max(5, Math.min(3600, lanternBurnTime)));
+            lanternBurnTime = Math.max(5, Math.min(3600, lanternBurnTime));
+        }
+        if (campfireBurnTime < 5 || campfireBurnTime > 3600) {
+            RealisticTorchesBT.LOGGER.warn("Correcting torchBurnTime: {} to {}. Must be between 5 and 3600", campfireBurnTime, Math.max(5, Math.min(3600, campfireBurnTime)));
+            campfireBurnTime = Math.max(5, Math.min(3600, campfireBurnTime));
+        }
         // Clamp multipliers
         if (rainTorchMultiplier < 1.0 || rainTorchMultiplier > 10.0) {
             RealisticTorchesBT.LOGGER.warn("Correcting rainTorchMultiplier: {} to {}. Must be between 1.0 and 10.0.", rainTorchMultiplier, Math.max(1.0, Math.min(10.0, rainTorchMultiplier)));
