@@ -1,4 +1,5 @@
 package com.enchantedwisp.torchesbt.ignition;
+
 import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import com.enchantedwisp.torchesbt.registry.CustomFuelTypes;
 import com.enchantedwisp.torchesbt.registry.DefaultFuelTypes;
@@ -19,10 +20,27 @@ import static com.enchantedwisp.torchesbt.util.JsonLoader.loadJsonFiles;
 public class FuelTypeLoader {
     private static final Logger LOGGER = com.enchantedwisp.torchesbt.RealisticTorchesBT.LOGGER;
 
+    /** Tracks whether the server is still starting to prevent double reload */
+    private static boolean serverStarting = true;
+
     private static void reset() {
         IGNITERS.clear();
         FuelTypeAPI.clear();
         LOGGER.debug("Reset fuel and igniter registries");
+    }
+
+    /** Load all fuels and igniters from JSON */
+    private static void loadAll(ResourceManager manager) {
+        // Load igniters
+        loadJsonFiles(manager, "ignite", IGNITERS, "ignite_amount");
+
+        // Load default fuel types
+        loadJsonFiles(manager, "fuel/torch", DefaultFuelTypes.TORCH.getFuelMap(), "add_time");
+        loadJsonFiles(manager, "fuel/lantern", DefaultFuelTypes.LANTERN.getFuelMap(), "add_time");
+        loadJsonFiles(manager, "fuel/campfire", DefaultFuelTypes.CAMPFIRE.getFuelMap(), "add_time");
+
+        // Load custom fuels
+        CustomFuelTypes.load(manager);
     }
 
     public static void register() {
@@ -31,20 +49,11 @@ public class FuelTypeLoader {
             ResourceManager manager = server.getResourceManager();
             LOGGER.info("Server starting, loading fuels and igniters");
             reset();
-
-            // Load igniters
-            loadJsonFiles(manager, "ignite", IGNITERS, "ignite_amount");
-
-            // Load default fuel types
-            loadJsonFiles(manager, "fuel/torch", DefaultFuelTypes.TORCH.getFuelMap(), "add_time");
-            loadJsonFiles(manager, "fuel/lantern", DefaultFuelTypes.LANTERN.getFuelMap(), "add_time");
-            loadJsonFiles(manager, "fuel/campfire", DefaultFuelTypes.CAMPFIRE.getFuelMap(), "add_time");
-
-            // Load custom fuels
-            CustomFuelTypes.load(manager);
+            loadAll(manager);
             LOGGER.info("Finished loading all fuels and igniters");
         });
 
+        // Register reload listener for manual /reloads
         ResourceManagerHelper.get(ResourceType.SERVER_DATA)
                 .registerReloadListener(new SimpleSynchronousResourceReloadListener() {
                     private final Identifier RELOAD_ID = new Identifier("torchesbt", "json_loader");
@@ -56,8 +65,16 @@ public class FuelTypeLoader {
 
                     @Override
                     public void reload(ResourceManager manager) {
+                        if (serverStarting) {
+                            // Skip the automatic reload during server startup
+                            serverStarting = false;
+                            return;
+                        }
+
+                        LOGGER.info("Reloading fuels and igniters");
                         reset();
-                        LOGGER.info("Cleared fuels and igniters on reload");
+                        loadAll(manager);
+                        LOGGER.info("Finished reloading all fuels and igniters");
                     }
                 });
 
