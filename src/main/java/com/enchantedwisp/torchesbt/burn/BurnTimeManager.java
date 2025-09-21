@@ -21,6 +21,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
+import dev.emi.trinkets.api.TrinketComponent;
+import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.SlotReference;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,7 +31,7 @@ import java.util.Objects;
 import static com.enchantedwisp.torchesbt.ignition.IgnitionHandler.copyProperties;
 
 /**
- * Handles burn time ticking for player-held items, nearby dropped items, and burnable blocks.
+ * Handles burn time ticking for player-held items, equipped trinkets, nearby dropped items, and burnable blocks.
  * Only ticks items when Dynamic Lights is enabled.
  * Fires BurnTickEvents to allow external mods to modify burn time decrements.
  */
@@ -98,12 +101,67 @@ public class BurnTimeManager {
                 extinguishPlayerItem(player, hand, stack);
             }
         }
+
+        // Process trinket slots
+        TrinketsApi.getTrinketComponent(player).ifPresent(component -> {
+            for (var slot : component.getAllEquipped()) {
+                ItemStack stack = slot.getRight();
+                SlotReference slotRef = slot.getLeft();
+                if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
+
+                if (ConfigCache.isDynamicLightsEnabled()) continue;
+
+                long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
+                if (burnTime <= 0) {
+                    extinguishTrinketItem(player, component, slotRef, stack);
+                    continue;
+                }
+
+                World world = player.getWorld();
+                BlockPos pos = player.getBlockPos();
+                boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
+                boolean isSubmerged = player.isSubmergedIn(FluidTags.WATER);
+                double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
+                double waterMult = BurnableRegistry.getWaterMultiplier(stack.getItem());
+
+                if (isSubmerged && waterMult == 10.0) {
+                    burnTime = 0;
+                    LOGGER.debug("Instantly extinguished trinket item due to water submersion (multiplier=10)");
+                } else {
+                    double effectiveMultiplier = 1.0;
+                    if (isRaining) {
+                        effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
+                    }
+                    if (isSubmerged && waterMult > 0.0) {
+                        effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
+                    }
+                    // Fire event to allow mods to modify decrement
+                    long baseDecrement = (long) Math.ceil(effectiveMultiplier);
+                    BurnTickEvents.PlayerHeldContext heldContext = new BurnTickEvents.PlayerHeldContext(player, stack, baseDecrement);
+                    long finalDecrement = BurnTickEvents.PLAYER_HELD.invoker().onTick(heldContext, baseDecrement);
+                    burnTime -= finalDecrement;
+                }
+
+                BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
+
+                if (burnTime <= 0) {
+                    extinguishTrinketItem(player, component, slotRef, stack);
+                }
+            }
+        });
     }
 
     private static void extinguishPlayerItem(PlayerEntity player, Hand hand, ItemStack stack) {
         ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
         player.setStackInHand(hand, unlit);
+    }
 
+    private static void extinguishTrinketItem(PlayerEntity player, TrinketComponent component, SlotReference slotRef, ItemStack stack) {
+        ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
+        String group = slotRef.inventory().getSlotType().getGroup();
+        String slotName = slotRef.inventory().getSlotType().getName();
+        component.getInventory().get(group).get(slotName).setStack(slotRef.index(), unlit);
+        LOGGER.debug("Extinguished trinket item in slot {}/{} for player {}", group, slotName, player.getName().getString());
     }
 
     // --- Tick nearby burnables ---
