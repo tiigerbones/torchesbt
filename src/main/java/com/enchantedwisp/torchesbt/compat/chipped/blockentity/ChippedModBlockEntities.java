@@ -1,66 +1,55 @@
 package com.enchantedwisp.torchesbt.compat.chipped.blockentity;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.compat.chipped.ChippedRegistryHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
+/**
+ * Handles registration of the special Chipped lantern BlockEntity.
+ * Waits until all four lantern variants ("big", "donut", "tall", "wide")
+ * are detected before registering.
+ */
 public class ChippedModBlockEntities {
-    private static final String[] SPECIAL_LANTERNS = {
-            "big", "donut", "tall", "wide"
-    };
+    private static final String[] SPECIAL_LANTERNS = { "big", "donut", "tall", "wide" };
 
     public static BlockEntityType<SpecialLanternBlockEntity> SPECIAL_LANTERN_BLOCK_ENTITY;
 
-    public static List<Block> getSpecialLanternBlocks() {
-        List<Block> validBlocks = new ArrayList<>();
+    // Tracks which lanterns have been found
+    private static final Map<String, Block> foundLanterns = new HashMap<>();
 
-        for (String variant : SPECIAL_LANTERNS) {
-            Identifier id = Identifier.of("chipped", variant + "_lantern");
-            Block block = Registries.BLOCK.get(id);
-
-            if (block != Blocks.AIR) {
-                if (BurnableRegistry.isBurnableBlock(block)) {
-                    validBlocks.add(block);
-                } else {
-                    RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - {} Special lantern found but not registered as burnable", id);
-                }
-            } else {
-                RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - {} Special lantern not found in registry", id);
-            }
+    /**
+     * Called when a Chipped lantern block is detected in the registry.
+     *
+     * @param variant The lantern variant (big, donut, tall, wide)
+     * @param block   The registered block instance
+     */
+    public static void onLanternDetected(String variant, Block block) {
+        if (SPECIAL_LANTERN_BLOCK_ENTITY != null) {
+            return; // Already registered
         }
 
-        return validBlocks;
-    }
+        foundLanterns.put(variant, block);
 
-    public static void register() {
-        SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder
-                .create(SpecialLanternBlockEntity::new) // no blocks yet
-                .build(null);
+        // Check if all required lanterns are present
+        if (foundLanterns.keySet().containsAll(Arrays.asList(SPECIAL_LANTERNS))) {
+            RealisticTorchesBT.LOGGER.info("[Compat] All special Chipped lanterns found, registering BlockEntityType");
 
-        Registry.register(
-                Registries.BLOCK_ENTITY_TYPE,
-                Identifier.of(RealisticTorchesBT.MOD_ID, "special_lantern_block_entity"),
-                SPECIAL_LANTERN_BLOCK_ENTITY
-        );
+            SPECIAL_LANTERN_BLOCK_ENTITY = BlockEntityType.Builder
+                    .create(SpecialLanternBlockEntity::new, foundLanterns.values().toArray(new Block[0]))
+                    .build(null);
 
-        RealisticTorchesBT.LOGGER.info("[Compat] Chipped - Registered Special Lantern for server startup");
-    }
-
-    public static void linkBlocks() {
-        List<Block> lanternBlocks = getSpecialLanternBlocks();
-        if (lanternBlocks.isEmpty()) {
-            RealisticTorchesBT.LOGGER.warn("[Compat] Chipped - No valid Chipped SpecialLanternBlocks found");
-            return;
+            Registry.register(
+                    Registries.BLOCK_ENTITY_TYPE,
+                    Identifier.of(RealisticTorchesBT.MOD_ID, "special_lantern_block_entity"),
+                    SPECIAL_LANTERN_BLOCK_ENTITY
+            );
+            ChippedRegistryHandler.registerBurnables();
         }
-        lanternBlocks.forEach(block -> BlockEntityType.getId(SPECIAL_LANTERN_BLOCK_ENTITY));
-        RealisticTorchesBT.LOGGER.info("[Compat] Chipped - Loaded {} special lantern blocks", lanternBlocks.size());
     }
 }

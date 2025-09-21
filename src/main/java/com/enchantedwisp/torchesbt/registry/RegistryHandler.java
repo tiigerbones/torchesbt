@@ -18,10 +18,13 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
 
 import static com.enchantedwisp.torchesbt.RealisticTorchesBT.MOD_ID;
 
 public class RegistryHandler {
+    private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
+
     public static final Block UNLIT_TORCH_BLOCK = new UnlitTorchBlock();
     public static final Block UNLIT_WALL_TORCH_BLOCK = new UnlitWallTorchBlock();
     public static final Block UNLIT_LANTERN_BLOCK = new UnlitLanternBlock();
@@ -108,5 +111,7 @@ public class RegistryHandler {
                 true,
                 DefaultFuelTypes.CAMPFIRE
         );
+        BurnableRegistry.snapshotCounts("Vanilla");
+        BurnableRegistry.logSource("Vanilla", LOGGER);
     }
 }

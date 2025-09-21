@@ -39,10 +39,10 @@
 		"cloth-config": ">=11.1.136"
 	},
 	"suggests": {
+      "chipped": "*",
       "lambdynlights": "*",
       "sodiumdynamiclights": "*",
       "trinkets": "*",
-      "jade": "*",
-      "chipped": "*"
+      "jade": "*"
     }
 }

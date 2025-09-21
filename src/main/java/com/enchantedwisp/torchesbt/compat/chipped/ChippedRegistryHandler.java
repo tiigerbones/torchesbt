@@ -1,21 +1,21 @@
 package com.enchantedwisp.torchesbt.compat.chipped;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitLanternBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.ChippedUnlitWallTorchBlock;
 import com.enchantedwisp.torchesbt.compat.chipped.block.SpecialUnlitLanternBlock;
+import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitTorchItem;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.registry.DefaultFuelTypes;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
-import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.event.registry.RegistryEntryAddedCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -69,6 +69,26 @@ public class ChippedRegistryHandler {
         // Register Chipped torches (items and blocks)
         for (String variant : CHIPPED_TORCHES) {
             registerTorch(variant);
+        }
+
+        RegistryEntryAddedCallback.event(Registries.BLOCK).register((rawId, id, block) -> {
+                    if (id.getNamespace().equals("chipped")) {
+                        for (String variant : SPECIAL_LANTERNS) {
+                            if (id.getPath().equals(variant + "_lantern")) {
+                                RealisticTorchesBT.LOGGER.info("[Compat] Detected Chipped special lantern: {}", id);
+                                ChippedModBlockEntities.onLanternDetected(variant, block);
+                            }
+                        }
+                    }
+        });
+
+        for (String variant : SPECIAL_LANTERNS) {
+            Identifier id = Identifier.of("chipped", variant + "_lantern");
+            if (Registries.BLOCK.containsId(id)) {
+                Block block = Registries.BLOCK.get(id);
+                RealisticTorchesBT.LOGGER.info("[Compat] Found existing Chipped lantern at startup: {}", id);
+                ChippedModBlockEntities.onLanternDetected(variant, block);
+            }
         }
 
         // Add items to item group
@@ -252,6 +272,8 @@ public class ChippedRegistryHandler {
                     Registries.ITEM.getId(unlitItem)
             );
         }
+        BurnableRegistry.snapshotCounts("[Compat] Chipped - ");
+        BurnableRegistry.logSource("[Compat] Chipped - ", RealisticTorchesBT.LOGGER);
     }
 
     @Environment(EnvType.CLIENT)

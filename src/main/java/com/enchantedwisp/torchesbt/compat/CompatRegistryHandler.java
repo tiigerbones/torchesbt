@@ -2,10 +2,8 @@ package com.enchantedwisp.torchesbt.compat;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.compat.chipped.ChippedRegistryHandler;
-import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEntities;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
+
 
 /**
  * Handles registration of compatibility items and blocks for other mods.
@@ -14,45 +12,34 @@ public class CompatRegistryHandler {
 
     private static void runIfModLoaded(
             String modId,
+            String displayName,
             Runnable action,
             String successMessage,
             String skipMessage
     ) {
         if (FabricLoader.getInstance().isModLoaded(modId)) {
             action.run();
-            RealisticTorchesBT.LOGGER.info("[Compat] {} detected - {}", modId, successMessage);
-        } else {
-            RealisticTorchesBT.LOGGER.info("[Compat] {} not detected - {}", modId, skipMessage);
+            RealisticTorchesBT.LOGGER.info("[Compat] {} detected - {}", displayName, successMessage);
         }
     }
 
     public static void registerChipped() {
         runIfModLoaded(
                 "chipped",
-                () -> {
-                    ChippedRegistryHandler.register();
-                    ChippedModBlockEntities.register();
-
-                    // Delay burnables + block linking until server is ready
-                    ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-                        ChippedRegistryHandler.registerBurnables();
-                        ChippedModBlockEntities.linkBlocks();
-                        BurnableRegistry.snapshotCounts("[Compat] Chipped - ");
-                        BurnableRegistry.logSource("[Compat] Chipped - ", RealisticTorchesBT.LOGGER);
-                    });
-                },
-                "Registered for server startup",
-                "Skipping chipped compat"
+                "Chipped",
+                ChippedRegistryHandler::register,
+                "Registered compat",
+                "Skipping compat"
         );
     }
-
 
     public static void registerChippedClient() {
         runIfModLoaded(
                 "chipped",
+                "Chipped",
                 ChippedRegistryHandler::registerRenderLayers,
-                "Registered for client",
-                "Skipping for client"
+                "Registered clientside compat",
+                "Skipping clientside compat"
         );
     }
 }

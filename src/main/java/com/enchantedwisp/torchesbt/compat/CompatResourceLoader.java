@@ -7,34 +7,60 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.slf4j.Logger;
 
+/**
+ * Manages registration of compatibility resource packs for supported mods.
+ * Only logs when a mod is found and its resource pack is successfully registered.
+ */
 public class CompatResourceLoader {
+    private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
 
-    public static void loadChippedResources() {
-        if (!FabricLoader.getInstance().isModLoaded("chipped")) {
-            RealisticTorchesBT.LOGGER.info("[Compat] Chipped not loaded, skipping resource pack");
-            return;
+    // Record to hold mod compatibility details
+    private record ModCompat(String modId, String packName, String packDisplayName) {
+        Identifier getPackId() {
+            return new Identifier(RealisticTorchesBT.MOD_ID, packName);
         }
 
-        ModContainer container = FabricLoader.getInstance().getModContainer(RealisticTorchesBT.MOD_ID).orElse(null);
+        Text getDisplayName() {
+            return Text.literal(packDisplayName + " Compat for RealisticTorchesBT");
+        }
+    }
+
+    private static final ModCompat[] COMPAT_MODS = {
+            new ModCompat(
+                    "chipped",
+                    "chipped_compat",
+                    "Chipped"),
+            new ModCompat(
+                    "trinkets",
+                    "trinkets_compat",
+                    "Trinkets")
+    };
+
+    public static void register() {
+        ModContainer container = FabricLoader.getInstance()
+                .getModContainer(RealisticTorchesBT.MOD_ID)
+                .orElse(null);
         if (container == null) {
-            RealisticTorchesBT.LOGGER.warn("[Compat] Could not find mod container, skipping Chipped resource pack");
+            LOGGER.warn("[Compat] Could not find mod container, skipping all compatibility resource packs");
             return;
         }
 
-        Identifier packId = new Identifier(RealisticTorchesBT.MOD_ID, "chipped_compat");
-
-        boolean success = ResourceManagerHelper.registerBuiltinResourcePack(
-                packId,
-                container,
-                Text.literal("Chipped Compat for RealisticTorchesBT"),
-                ResourcePackActivationType.ALWAYS_ENABLED
-        );
-
-        if (success) {
-            RealisticTorchesBT.LOGGER.info("[Compat] Chipped resource pack registered!");
-        } else {
-            RealisticTorchesBT.LOGGER.warn("[Compat] Failed to register Chipped resource pack!");
+        for (ModCompat mod : COMPAT_MODS) {
+            if (FabricLoader.getInstance().isModLoaded(mod.modId)) {
+                boolean success = ResourceManagerHelper.registerBuiltinResourcePack(
+                        mod.getPackId(),
+                        container,
+                        mod.getDisplayName(),
+                        ResourcePackActivationType.ALWAYS_ENABLED
+                );
+                if (success) {
+                    LOGGER.info("[Compat] {} - Resource pack for RealisticTorchesBT registered!", mod.packDisplayName);
+                } else {
+                    LOGGER.warn("[Compat] Failed to register {} resource pack!", mod.packDisplayName);
+                }
+            }
         }
     }
 }

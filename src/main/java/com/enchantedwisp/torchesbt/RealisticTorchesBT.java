@@ -7,7 +7,6 @@ import com.enchantedwisp.torchesbt.compat.CompatResourceLoader;
 import com.enchantedwisp.torchesbt.ignition.FuelTypeLoader;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.util.*;
@@ -15,7 +14,6 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,15 +59,12 @@ public class RealisticTorchesBT implements ModInitializer {
         // Register items
         RegistryHandler.register();
         ModBlockEntities.register();
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            RegistryHandler.registerBurnables();
-            BurnableRegistry.snapshotCounts("Vanilla");
-            BurnableRegistry.logSource("Vanilla", LOGGER);
-        });
+        RegistryHandler.registerBurnables();
 
-        // Compat Items
+
+        // Compat
         CompatRegistryHandler.registerChipped();
-        CompatResourceLoader.loadChippedResources();
+        CompatResourceLoader.register();
 
 
         // Register Particle
