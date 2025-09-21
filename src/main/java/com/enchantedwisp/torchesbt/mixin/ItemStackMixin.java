@@ -8,6 +8,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
@@ -60,10 +62,25 @@ public class ItemStackMixin {
     @Inject(method = "getMaxCount", at = @At("HEAD"), cancellable = true)
     private void getMaxCount(CallbackInfoReturnable<Integer> cir) {
         ItemStack stack = (ItemStack) (Object) this;
-        if (BurnableRegistry.isBurnableItem(stack.getItem()) && stack.hasNbt()) {
-            assert stack.getNbt() != null;
-            if (stack.getNbt().contains("remaining_burn")) {
-                cir.setReturnValue(1); // Prevent stacking if the item has burn time
+        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
+            if (!stack.hasNbt() || !Objects.requireNonNull(stack.getNbt()).contains("remaining_burn")) {
+                cir.setReturnValue(stack.getItem().getMaxCount());
+                return;
+            }
+            cir.setReturnValue(stack.getItem().getMaxCount());
+        }
+    }
+
+    @Inject(method = "areEqual", at = @At("HEAD"), cancellable = true)
+    private static void areEqual(ItemStack stack1, ItemStack stack2, CallbackInfoReturnable<Boolean> cir) {
+        if (BurnableRegistry.isBurnableItem(stack1.getItem()) && BurnableRegistry.isBurnableItem(stack2.getItem())) {
+            // If items are the same, check their burn times
+            if (ItemStack.areItemsEqual(stack1, stack2)) {
+                long burnTime1 = BurnTimeUtils.getCurrentBurnTime(stack1);
+                long burnTime2 = BurnTimeUtils.getCurrentBurnTime(stack2);
+                cir.setReturnValue(burnTime1 == burnTime2);
+            } else {
+                cir.setReturnValue(false);
             }
         }
     }
