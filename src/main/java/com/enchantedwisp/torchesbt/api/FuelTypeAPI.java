@@ -1,5 +1,6 @@
     package com.enchantedwisp.torchesbt.api;
 
+    import com.enchantedwisp.torchesbt.core.DefaultFuelTypes;
     import net.minecraft.item.Item;
     import net.minecraft.registry.tag.TagKey;
     import net.minecraft.util.Identifier;
@@ -13,7 +14,7 @@
      * API for managing custom fuel types for burnable blocks or items.
      * Allows registering new fuel types and associating items or tags with burn times.
      *
-     * <p>For examples of built-in fuel registration, see {@link com.enchantedwisp.torchesbt.registry.DefaultFuelTypes}.
+     * <p>For examples of built-in fuel registration, see {@link DefaultFuelTypes}.
      */
     public class FuelTypeAPI {
         public static final String MOD_ID = "torchesbt";

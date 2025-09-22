@@ -58,7 +58,7 @@ public class BurnTimeManager {
             ItemStack stack = player.getStackInHand(hand);
             if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
 
-            if (ConfigCache.isDynamicLightsEnabled()) continue;
+            if (!ConfigCache.isDynamicLightsEnabled()) continue;
 
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
             if (burnTime <= 0) {
@@ -132,7 +132,7 @@ public class BurnTimeManager {
         // Dropped items
         List<ItemEntity> items = world.getEntitiesByClass(ItemEntity.class, scanBox, e -> BurnableRegistry.isBurnableItem(e.getStack().getItem()));
         for (ItemEntity itemEntity : items) {
-            if (ConfigCache.isDynamicLightsEnabled()) continue;
+            if (!ConfigCache.isDynamicLightsEnabled()) continue;
 
             ItemStack stack = itemEntity.getStack();
             long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);

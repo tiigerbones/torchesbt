@@ -1,10 +1,10 @@
 package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
-import com.enchantedwisp.torchesbt.registry.blocks.FlameLevel;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.FlameLevel;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;

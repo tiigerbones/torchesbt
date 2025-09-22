@@ -1,7 +1,7 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
@@ -31,7 +31,7 @@ public abstract class LanternBlockMixin extends Block implements BlockEntityProv
     public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
         super.onPlaced(world, pos, state, placer, itemStack);
         BlockEntity entity = world.getBlockEntity(pos);
-        if (entity instanceof com.enchantedwisp.torchesbt.burn.Burnable) {
+        if (entity instanceof com.enchantedwisp.torchesbt.core.burn.Burnable) {
             BurnTimeManager.setBurnTimeOnPlacement(world, pos, entity, itemStack, BurnableRegistry.getBurnTime(state.getBlock()));
         }
     }

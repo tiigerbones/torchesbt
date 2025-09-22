@@ -12,6 +12,10 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.Gui.PrefixText
     public boolean enableDynamicLights = false;
 
+    @Comment("Allow refueling items in slots. Default: true")
+    @ConfigEntry.Gui.PrefixText
+    public boolean allowInventoryRefueling = true;
+
     @Comment("Burn time for torches. Default: 40 Max: 3600")
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)

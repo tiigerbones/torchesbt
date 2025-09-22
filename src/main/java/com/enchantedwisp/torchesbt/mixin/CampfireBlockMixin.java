@@ -1,6 +1,6 @@
 package com.enchantedwisp.torchesbt.mixin;
 
-import com.enchantedwisp.torchesbt.registry.blocks.FlameLevel;
+import com.enchantedwisp.torchesbt.core.FlameLevel;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;

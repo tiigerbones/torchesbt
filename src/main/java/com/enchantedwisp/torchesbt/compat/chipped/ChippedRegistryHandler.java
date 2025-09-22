@@ -9,8 +9,8 @@ import com.enchantedwisp.torchesbt.compat.chipped.blockentity.ChippedModBlockEnt
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedSpecialUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitLanternItem;
 import com.enchantedwisp.torchesbt.compat.chipped.item.ChippedUnlitTorchItem;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
-import com.enchantedwisp.torchesbt.registry.DefaultFuelTypes;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.DefaultFuelTypes;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

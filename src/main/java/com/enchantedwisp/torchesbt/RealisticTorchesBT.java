@@ -1,12 +1,14 @@
 package com.enchantedwisp.torchesbt;
 
 import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
 import com.enchantedwisp.torchesbt.compat.CompatResourceLoader;
-import com.enchantedwisp.torchesbt.fuel.FuelTypeLoader;
-import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
+import com.enchantedwisp.torchesbt.core.fuel.FuelTypeLoader;
+import com.enchantedwisp.torchesbt.core.fuel.ItemFuelHandler;
+import com.enchantedwisp.torchesbt.core.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
+import com.enchantedwisp.torchesbt.network.ItemFuelPacket;
 import com.enchantedwisp.torchesbt.registry.Particles;
 import com.enchantedwisp.torchesbt.registry.RegistryHandler;
 import com.enchantedwisp.torchesbt.util.*;
@@ -55,6 +57,7 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Fuels
         FuelTypeLoader.register();
+        ItemFuelPacket.register();
 
         // Register items
         RegistryHandler.register();
@@ -64,6 +67,7 @@ public class RealisticTorchesBT implements ModInitializer {
 
         // Compat
         CompatRegistryHandler.registerChipped();
+        CompatRegistryHandler.registerTrinkets();
         CompatResourceLoader.register();
 
 

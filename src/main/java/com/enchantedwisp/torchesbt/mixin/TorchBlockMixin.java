@@ -1,8 +1,8 @@
 package com.enchantedwisp.torchesbt.mixin;
 
 import com.enchantedwisp.torchesbt.blockentity.TorchBlockEntity;
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;

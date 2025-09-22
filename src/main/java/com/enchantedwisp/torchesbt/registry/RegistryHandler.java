@@ -1,6 +1,8 @@
 package com.enchantedwisp.torchesbt.registry;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.DefaultFuelTypes;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitLanternBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitTorchBlock;
 import com.enchantedwisp.torchesbt.registry.blocks.UnlitWallTorchBlock;

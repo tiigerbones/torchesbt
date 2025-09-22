@@ -1,17 +1,23 @@
 package com.enchantedwisp.torchesbt.api;
 
-import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
-import com.enchantedwisp.torchesbt.burn.Burnable;
-import com.enchantedwisp.torchesbt.ignition.IgnitionHandler;
+import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeUtils;
+import com.enchantedwisp.torchesbt.core.burn.Burnable;
+import com.enchantedwisp.torchesbt.core.ignition.IgnitionHandler;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Public API for querying, modifying, and igniting burnables.
@@ -138,5 +144,34 @@ public class BurnTime {
         world.setBlockState(pos, newState, 3);
         setBurnTime(world, pos, burnTime);
         return true;
+    }
+
+    /**
+     * Hooks that run during `processPlayerItems`.
+     * Allows compat mods to add extra tick behavior for players.
+     */
+    private static final List<Consumer<PlayerEntity>> PLAYER_ITEM_TICK_HANDLERS = new ArrayList<>();
+
+    /**
+     * Registers a callback to be invoked during `processPlayerItems`.
+     *
+     * @param handler The callback, receiving the player as an argument
+     */
+    public static void registerPlayerItemTickHandler(Consumer<PlayerEntity> handler) {
+        PLAYER_ITEM_TICK_HANDLERS.add(handler);
+    }
+
+    /**
+     * Called internally by BurnTimeManager when ticking player items.
+     */
+    public static void runPlayerItemTickHandlers(PlayerEntity player) {
+        for (Consumer<PlayerEntity> handler : PLAYER_ITEM_TICK_HANDLERS) {
+            try {
+                handler.accept(player);
+            } catch (Exception e) {
+                // Avoid crashing the tick if a compat mod fails
+                RealisticTorchesBT.LOGGER.warn("Error in player item tick handler", e);
+            }
+        }
     }
 }

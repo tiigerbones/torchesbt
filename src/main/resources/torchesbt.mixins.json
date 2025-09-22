@@ -20,6 +20,7 @@
     "requireAnnotations": true
   },
   "client": [
+    "HandledScreenMixin",
     "HeldItemRendererMixin"
   ]
 }
