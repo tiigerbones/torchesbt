@@ -1,7 +1,6 @@
 {
   "items": [
-    "minecraft:paper",
-    "minecraft:pink_petals"
+    "#torchesbt:common_fuel"
   ],
   "add_time": 20
 }
