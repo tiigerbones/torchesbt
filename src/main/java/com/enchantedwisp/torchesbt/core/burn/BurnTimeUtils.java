@@ -1,7 +1,7 @@
-package com.enchantedwisp.torchesbt.burn;
+package com.enchantedwisp.torchesbt.core.burn;
 
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.ItemStack;

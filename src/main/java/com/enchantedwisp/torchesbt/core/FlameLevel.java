@@ -1,4 +1,4 @@
-package com.enchantedwisp.torchesbt.registry.blocks;
+package com.enchantedwisp.torchesbt.core;
 
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.util.StringIdentifiable;

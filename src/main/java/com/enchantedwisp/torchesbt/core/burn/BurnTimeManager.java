@@ -1,9 +1,9 @@
-package com.enchantedwisp.torchesbt.burn;
+package com.enchantedwisp.torchesbt.core.burn;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.api.BurnTickEvents;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.ConfigCache;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.block.Block;
@@ -16,19 +16,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Hand;
-import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
-import dev.emi.trinkets.api.TrinketComponent;
-import dev.emi.trinkets.api.TrinketsApi;
-import dev.emi.trinkets.api.SlotReference;
 
 import java.util.List;
 import java.util.Objects;
 
-import static com.enchantedwisp.torchesbt.ignition.IgnitionHandler.copyProperties;
+import static com.enchantedwisp.torchesbt.core.ignition.IgnitionHandler.copyProperties;
 
 /**
  * Handles burn time ticking for player-held items, equipped trinkets, nearby dropped items, and burnable blocks.
@@ -101,54 +97,8 @@ public class BurnTimeManager {
                 extinguishPlayerItem(player, hand, stack);
             }
         }
-
-        // Process trinket slots
-        TrinketsApi.getTrinketComponent(player).ifPresent(component -> {
-            for (var slot : component.getAllEquipped()) {
-                ItemStack stack = slot.getRight();
-                SlotReference slotRef = slot.getLeft();
-                if (!BurnableRegistry.isBurnableItem(stack.getItem())) continue;
-
-                if (ConfigCache.isDynamicLightsEnabled()) continue;
-
-                long burnTime = BurnTimeUtils.getCurrentBurnTime(stack);
-                if (burnTime <= 0) {
-                    extinguishTrinketItem(player, component, slotRef, stack);
-                    continue;
-                }
-
-                World world = player.getWorld();
-                BlockPos pos = player.getBlockPos();
-                boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
-                boolean isSubmerged = player.isSubmergedIn(FluidTags.WATER);
-                double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
-                double waterMult = BurnableRegistry.getWaterMultiplier(stack.getItem());
-
-                if (isSubmerged && waterMult == 10.0) {
-                    burnTime = 0;
-                    LOGGER.debug("Instantly extinguished trinket item due to water submersion (multiplier=10)");
-                } else {
-                    double effectiveMultiplier = 1.0;
-                    if (isRaining) {
-                        effectiveMultiplier = Math.max(effectiveMultiplier, rainMult);
-                    }
-                    if (isSubmerged && waterMult > 0.0) {
-                        effectiveMultiplier = Math.max(effectiveMultiplier, waterMult);
-                    }
-                    // Fire event to allow mods to modify decrement
-                    long baseDecrement = (long) Math.ceil(effectiveMultiplier);
-                    BurnTickEvents.PlayerHeldContext heldContext = new BurnTickEvents.PlayerHeldContext(player, stack, baseDecrement);
-                    long finalDecrement = BurnTickEvents.PLAYER_HELD.invoker().onTick(heldContext, baseDecrement);
-                    burnTime -= finalDecrement;
-                }
-
-                BurnTimeUtils.setCurrentBurnTime(stack, Math.max(0, burnTime));
-
-                if (burnTime <= 0) {
-                    extinguishTrinketItem(player, component, slotRef, stack);
-                }
-            }
-        });
+        // Call registered player item tick handlers
+        com.enchantedwisp.torchesbt.api.BurnTime.runPlayerItemTickHandlers(player);
     }
 
     private static void extinguishPlayerItem(PlayerEntity player, Hand hand, ItemStack stack) {
@@ -156,13 +106,6 @@ public class BurnTimeManager {
         player.setStackInHand(hand, unlit);
     }
 
-    private static void extinguishTrinketItem(PlayerEntity player, TrinketComponent component, SlotReference slotRef, ItemStack stack) {
-        ItemStack unlit = new ItemStack(Objects.requireNonNull(BurnableRegistry.getUnlitItem(stack.getItem())), stack.getCount());
-        String group = slotRef.inventory().getSlotType().getGroup();
-        String slotName = slotRef.inventory().getSlotType().getName();
-        component.getInventory().get(group).get(slotName).setStack(slotRef.index(), unlit);
-        LOGGER.debug("Extinguished trinket item in slot {}/{} for player {}", group, slotName, player.getName().getString());
-    }
 
     // --- Tick nearby burnables ---
     private static void processNearbyBurnables(PlayerEntity player) {

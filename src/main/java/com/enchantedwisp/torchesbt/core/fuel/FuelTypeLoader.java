@@ -1,8 +1,8 @@
-package com.enchantedwisp.torchesbt.fuel;
+package com.enchantedwisp.torchesbt.core.fuel;
 
 import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
-import com.enchantedwisp.torchesbt.registry.CustomFuelTypes;
-import com.enchantedwisp.torchesbt.registry.DefaultFuelTypes;
+import com.enchantedwisp.torchesbt.core.CustomFuelTypes;
+import com.enchantedwisp.torchesbt.core.DefaultFuelTypes;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;

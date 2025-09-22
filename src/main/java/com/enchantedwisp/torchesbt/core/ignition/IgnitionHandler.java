@@ -1,11 +1,11 @@
-package com.enchantedwisp.torchesbt.ignition;
+package com.enchantedwisp.torchesbt.core.ignition;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.api.IgnitionEvents;
-import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
-import com.enchantedwisp.torchesbt.burn.BurnTimeUtils;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeManager;
+import com.enchantedwisp.torchesbt.core.burn.BurnTimeUtils;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
-import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
+import com.enchantedwisp.torchesbt.core.BurnableRegistry;
 import com.enchantedwisp.torchesbt.util.JsonLoader;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;

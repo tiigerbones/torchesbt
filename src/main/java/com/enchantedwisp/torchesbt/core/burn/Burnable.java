@@ -1,4 +1,4 @@
-package com.enchantedwisp.torchesbt.burn;
+package com.enchantedwisp.torchesbt.core.burn;
 
 import net.minecraft.world.World;
 

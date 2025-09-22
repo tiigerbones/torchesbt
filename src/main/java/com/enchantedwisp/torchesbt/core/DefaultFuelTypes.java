@@ -1,4 +1,4 @@
-package com.enchantedwisp.torchesbt.registry;
+package com.enchantedwisp.torchesbt.core;
 
 import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import net.minecraft.util.Identifier;

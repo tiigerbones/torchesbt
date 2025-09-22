@@ -1,7 +1,7 @@
-package com.enchantedwisp.torchesbt.ignition;
+package com.enchantedwisp.torchesbt.core.ignition;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
-import com.enchantedwisp.torchesbt.fuel.FuelHandler;
+import com.enchantedwisp.torchesbt.core.fuel.FuelHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
