@@ -4,7 +4,7 @@ import com.enchantedwisp.torchesbt.blockentity.ModBlockEntities;
 import com.enchantedwisp.torchesbt.burn.BurnTimeManager;
 import com.enchantedwisp.torchesbt.compat.CompatRegistryHandler;
 import com.enchantedwisp.torchesbt.compat.CompatResourceLoader;
-import com.enchantedwisp.torchesbt.ignition.FuelTypeLoader;
+import com.enchantedwisp.torchesbt.fuel.FuelTypeLoader;
 import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.config.RealisticTorchesBTConfig;
 import com.enchantedwisp.torchesbt.registry.Particles;
