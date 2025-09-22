@@ -1,7 +1,8 @@
-package com.enchantedwisp.torchesbt.ignition;
+package com.enchantedwisp.torchesbt.fuel;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
 import com.enchantedwisp.torchesbt.burn.Burnable;
+import com.enchantedwisp.torchesbt.ignition.ReignitionHandler;
 import com.enchantedwisp.torchesbt.mixinaccess.ICampfireBurnAccessor;
 import com.enchantedwisp.torchesbt.registry.BurnableRegistry;
 import com.enchantedwisp.torchesbt.api.FuelTypeAPI;

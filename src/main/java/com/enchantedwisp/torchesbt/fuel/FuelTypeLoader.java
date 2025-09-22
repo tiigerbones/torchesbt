@@ -1,4 +1,4 @@
-package com.enchantedwisp.torchesbt.ignition;
+package com.enchantedwisp.torchesbt.fuel;
 
 import com.enchantedwisp.torchesbt.api.FuelTypeAPI;
 import com.enchantedwisp.torchesbt.registry.CustomFuelTypes;
