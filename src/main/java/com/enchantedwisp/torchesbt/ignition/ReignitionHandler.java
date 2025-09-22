@@ -1,6 +1,7 @@
 package com.enchantedwisp.torchesbt.ignition;
 
 import com.enchantedwisp.torchesbt.RealisticTorchesBT;
+import com.enchantedwisp.torchesbt.fuel.FuelHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -50,7 +51,7 @@ public class ReignitionHandler {
      * @param player The player using the fuel
      * @param hand   The hand holding it
      */
-    protected static void consumeFuel(ItemStack stack, PlayerEntity player, Hand hand) {
+    public static void consumeFuel(ItemStack stack, PlayerEntity player, Hand hand) {
         if (!player.isCreative()) {
             stack.decrement(1);
         }
