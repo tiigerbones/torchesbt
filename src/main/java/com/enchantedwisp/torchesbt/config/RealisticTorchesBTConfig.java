@@ -16,6 +16,18 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.Gui.PrefixText
     public boolean allowInventoryRefueling = true;
 
+    @Comment("Allow torches to tick, causing them to burn out over time. Default: true")
+    @ConfigEntry.Gui.PrefixText
+    public boolean allowTorchTick = true;
+
+    @Comment("Allow lanterns to tick, causing them to burn out over time. Default: true")
+    @ConfigEntry.Gui.PrefixText
+    public boolean allowLanternTick = true;
+
+    @Comment("Allow campfire to tick, causing them to burn out over time. Default: true")
+    @ConfigEntry.Gui.PrefixText
+    public boolean allowCampfireTick = true;
+
     @Comment("Burn time for torches. Default: 40 Max: 3600")
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
@@ -29,7 +41,7 @@ public class RealisticTorchesBTConfig implements ConfigData {
     @ConfigEntry.BoundedDiscrete(min = 5, max = 3600)
     public int campfireBurnTime = 100;
 
-    @Comment("If true, rain affects burn time on burnables. Default: true")
+    @Comment("If true, rain affects Burn Time on burnables. Default: true")
     @ConfigEntry.Gui.PrefixText
     public boolean enableRainExtinguish = true;
 

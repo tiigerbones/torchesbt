@@ -29,6 +29,9 @@ public class JadePlugin implements IWailaPlugin {
                 // Skip if not burnable
                 if (!BurnableRegistry.isBurnableBlock(block)) return;
 
+                // Skip if ticking is disabled for this block type (burn time is infinite/vanilla)
+                if (!BurnableRegistry.isTickingEnabled(block)) return;
+
                 // For campfires, only show if lit
                 if (block == Blocks.CAMPFIRE && !accessor.getBlockState().get(net.minecraft.block.CampfireBlock.LIT)) return;
 

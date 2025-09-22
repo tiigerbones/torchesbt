@@ -66,6 +66,8 @@ public class BurnTimeManager {
                 continue;
             }
 
+            if (!BurnableRegistry.isTickingEnabled(stack.getItem())) continue;
+
             World world = player.getWorld();
             BlockPos pos = player.getBlockPos();
             boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
@@ -142,6 +144,8 @@ public class BurnTimeManager {
                 continue;
             }
 
+            if (!BurnableRegistry.isTickingEnabled(stack.getItem())) continue;
+
             boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, itemEntity.getBlockPos());
             boolean isSubmerged = itemEntity.isSubmergedIn(FluidTags.WATER);
             double rainMult = BurnableRegistry.getRainMultiplier(stack.getItem());
@@ -186,6 +190,8 @@ public class BurnTimeManager {
             }
             return;
         }
+        if (!BurnableRegistry.isTickingEnabled(block)) return;
+
         // Fire event to allow mods to modify decrement
         long baseDecrement = (long) Math.ceil(burnable.getRainMultiplier() * (BurnTimeUtils.isActuallyRainingAt(world, pos) ? 1.0 : 0.0)
                 + burnable.getWaterMultiplier() * (world.getFluidState(pos).isIn(FluidTags.WATER) ? 1.0 : 0.0));
@@ -198,6 +204,7 @@ public class BurnTimeManager {
         long burnTime = campfire.torchesbt_getBurnTime();
 
         if (burnTime > 0) {
+            if (!BurnableRegistry.isTickingEnabled(Blocks.CAMPFIRE)) return;
             boolean isRaining = BurnTimeUtils.isActuallyRainingAt(world, pos);
             boolean isSubmerged = world.getFluidState(pos).isIn(FluidTags.WATER);
             double rainMult = BurnableRegistry.getRainMultiplier(Blocks.CAMPFIRE);

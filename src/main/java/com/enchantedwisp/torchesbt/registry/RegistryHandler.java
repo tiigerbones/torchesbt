@@ -23,6 +23,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 
 import static com.enchantedwisp.torchesbt.RealisticTorchesBT.MOD_ID;
+import static com.enchantedwisp.torchesbt.RealisticTorchesBT.getConfig;
 
 public class RegistryHandler {
     private static final Logger LOGGER = RealisticTorchesBT.LOGGER;
@@ -68,14 +69,16 @@ public class RegistryHandler {
                 RegistryHandler.UNLIT_TORCH,
                 ConfigCache.getTorchBurnTime(),
                 ConfigCache.getRainTorchMultiplier(),
-                ConfigCache.getWaterTorchMultiplier()
+                ConfigCache.getWaterTorchMultiplier(),
+                ConfigCache.isAllowTorchTick()
         );
         BurnableRegistry.registerBurnableItem(
                 Items.LANTERN,
                 RegistryHandler.UNLIT_LANTERN,
                 ConfigCache.getLanternBurnTime(),
                 ConfigCache.getRainLanternMultiplier(),
-                ConfigCache.getWaterLanternMultiplier()
+                ConfigCache.getWaterLanternMultiplier(),
+                ConfigCache.isAllowLanternTick()
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.TORCH,
@@ -84,7 +87,8 @@ public class RegistryHandler {
                 ConfigCache.getRainTorchMultiplier(),
                 ConfigCache.getWaterTorchMultiplier(),
                 true,
-                DefaultFuelTypes.TORCH
+                DefaultFuelTypes.TORCH,
+                ConfigCache.isAllowTorchTick()
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.WALL_TORCH,
@@ -93,7 +97,8 @@ public class RegistryHandler {
                 ConfigCache.getRainTorchMultiplier(),
                 ConfigCache.getWaterTorchMultiplier(),
                 true,
-                DefaultFuelTypes.TORCH
+                DefaultFuelTypes.TORCH,
+                ConfigCache.isAllowTorchTick()
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.LANTERN,
@@ -102,7 +107,8 @@ public class RegistryHandler {
                 ConfigCache.getRainLanternMultiplier(),
                 ConfigCache.getWaterLanternMultiplier(),
                 true,
-                DefaultFuelTypes.LANTERN
+                DefaultFuelTypes.LANTERN,
+                ConfigCache.isAllowLanternTick()
         );
         BurnableRegistry.registerBurnableBlock(
                 Blocks.CAMPFIRE,
@@ -111,7 +117,8 @@ public class RegistryHandler {
                 ConfigCache.getRainCampfireMultiplier(),
                 ConfigCache.getWaterCampfireMultiplier(),
                 true,
-                DefaultFuelTypes.CAMPFIRE
+                DefaultFuelTypes.CAMPFIRE,
+                ConfigCache.isAllowCampfireTick()
         );
         BurnableRegistry.snapshotCounts("Vanilla");
         BurnableRegistry.logSource("Vanilla", LOGGER);

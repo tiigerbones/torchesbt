@@ -82,9 +82,9 @@ public class BurnableRegistry {
      * @param waterMultiplier multiplier applied when submerged in water
      */
     public static void registerBurnableItem(Item litItem, Item unlitItem,
-                                             long burnTime, double rainMultiplier, double waterMultiplier) {
-        BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier, waterMultiplier));
-        LOGGER.debug("Registered burnable item: {} (unlit: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem));
+                                             long burnTime, double rainMultiplier, double waterMultiplier, boolean enableTicking) {
+        BURNABLE_ITEMS.put(litItem, new BurnableItemEntry(litItem, unlitItem, burnTime, rainMultiplier, waterMultiplier, enableTicking));
+        LOGGER.debug("Registered burnable item: {} (unlit: {}, ticking: {})", Registries.ITEM.getId(litItem), Registries.ITEM.getId(unlitItem), enableTicking);
     }
 
     /**
@@ -105,15 +105,17 @@ public class BurnableRegistry {
             double rainMultiplier,
             double waterMultiplier,
             boolean hasBlockEntity,
-            FuelTypeAPI.FuelType fuelType
+            FuelTypeAPI.FuelType fuelType,
+            boolean enableTicking
     ) {
         BURNABLE_BLOCKS.put(litBlock, new BurnableBlockEntry(
-                litBlock, unlitBlock, burnTime, rainMultiplier, waterMultiplier, hasBlockEntity, fuelType
+                litBlock, unlitBlock, burnTime, rainMultiplier, waterMultiplier, hasBlockEntity, fuelType, enableTicking
         ));
-        LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {})",
+        LOGGER.debug("Registered burnable block: {} (unlit: {}, fuelType: {}, ticking: {})",
                 Registries.BLOCK.getId(litBlock),
                 Registries.BLOCK.getId(unlitBlock),
-                fuelType != null ? fuelType.getId() : "null"
+                fuelType != null ? fuelType.getId() : "null",
+                enableTicking
         );
     }
 
@@ -182,14 +184,24 @@ public class BurnableRegistry {
         return entry != null && entry.hasBlockEntity();
     }
 
+    public static boolean isTickingEnabled(Item item) {
+        BurnableItemEntry entry = BURNABLE_ITEMS.get(item);
+        return entry != null && entry.enableTicking();
+    }
+
+    public static boolean isTickingEnabled(Block block) {
+        BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
+        return entry != null && entry.enableTicking();
+    }
+
     public static FuelTypeAPI.FuelType getFuelType(Block block) {
         BurnableBlockEntry entry = BURNABLE_BLOCKS.get(block);
         return entry != null ? entry.fuelType() : null;
     }
 
     /** Record representing a burnable item and its properties */
-    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier) {}
+    public record BurnableItemEntry(Item litItem, Item unlitItem, long burnTime, double rainMultiplier, double waterMultiplier, boolean enableTicking) {}
 
     /** Record representing a burnable block and its properties */
-    public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, double waterMultiplier, boolean hasBlockEntity, FuelTypeAPI.FuelType fuelType) {}
+    public record BurnableBlockEntry(Block litBlock, Block unlitBlock, long burnTime, double rainMultiplier, double waterMultiplier, boolean hasBlockEntity, FuelTypeAPI.FuelType fuelType, boolean enableTicking) {}
 }

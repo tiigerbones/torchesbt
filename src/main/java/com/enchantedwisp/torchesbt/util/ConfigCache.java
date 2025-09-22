@@ -19,6 +19,9 @@ public class ConfigCache {
     private static double waterCampfireMultiplier;
     private static boolean enableDynamicLights;
     private static boolean allowInventoryRefueling;
+    private static boolean allowTorchTick;
+    private static boolean allowLanternTick;
+    private static boolean allowCampfireTick;
 
     public static void initialize() {
         RealisticTorchesBTConfig config = AutoConfig.getConfigHolder(RealisticTorchesBTConfig.class).getConfig();
@@ -33,7 +36,10 @@ public class ConfigCache {
         waterLanternMultiplier = config.waterLanternMultiplier;
         waterCampfireMultiplier = config.waterCampfireMultiplier;
         enableDynamicLights = config.enableDynamicLights;
-        allowInventoryRefueling =config.allowInventoryRefueling;
+        allowInventoryRefueling = config.allowInventoryRefueling;
+        allowTorchTick = config.allowTorchTick;
+        allowLanternTick = config.allowLanternTick;
+        allowCampfireTick = config.allowCampfireTick;
 
         LOGGER.info(
                 "Loaded config into cache: torchBurnTime={} ticks, enableRainExtinguish={}, dynamicLights={}, allowInventoryRefueling{}",
@@ -96,5 +102,17 @@ public class ConfigCache {
 
     public static boolean allowInventoryRefueling() {
         return allowInventoryRefueling;
+    }
+
+    public static boolean isAllowTorchTick() {
+        return allowTorchTick;
+    }
+
+    public static boolean isAllowLanternTick() {
+        return allowLanternTick;
+    }
+
+    public static boolean isAllowCampfireTick() {
+        return allowLanternTick;
     }
 }

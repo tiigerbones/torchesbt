@@ -30,13 +30,12 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> implements Scr
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V",
             at = @At("HEAD"), cancellable = true)
     private void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
-        // Check if inventory refueling is enabled
         if (!ConfigCache.allowInventoryRefueling()) {
-            return; // Do nothing if refueling is disabled
+            return;
         }
 
         if (slot == null || !slot.hasStack() || actionType != SlotActionType.PICKUP || button != 0) {
-            return; // Only handle left-clicks (button 0) with PICKUP action
+            return;
         }
 
         HandledScreen<?> screen = (HandledScreen<?>) (Object) this;
@@ -45,7 +44,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> implements Scr
             return;
         }
 
-        // Check if cursor holds a valid fuel item
         Identifier fuelItemId = Registries.ITEM.getId(cursorStack.getItem());
         boolean isValidFuel = false;
         for (Identifier fuelTypeId : FuelTypeAPI.getFuelTypeIds()) {
@@ -59,13 +57,11 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> implements Scr
             return;
         }
 
-        // Check if the slot contains a burnable item
         ItemStack targetStack = slot.getStack();
         if (!BurnableRegistry.isBurnableItem(targetStack.getItem())) {
             return;
         }
 
-        // Use the handler slot ID (works for inventory, trinkets, etc.)
         int handlerSlotId = slot.id;
 
         // Send packet to server

@@ -19,7 +19,7 @@ public class ItemMixin {
 
     @Inject(method = "appendTooltip", at = @At("TAIL"))
     private void appendBurnTimeTooltip(ItemStack stack, World world, List<Text> tooltip, TooltipContext context, CallbackInfo ci) {
-        if (BurnableRegistry.isBurnableItem(stack.getItem())) {
+        if (BurnableRegistry.isBurnableItem(stack.getItem()) && BurnableRegistry.isTickingEnabled(stack.getItem())) {
             long current = BurnTimeUtils.getCurrentBurnTime(stack);
             long max = BurnTimeUtils.getMaxBurnTime(stack);
             tooltip.add(Text.literal("Burn Time: " + (current / 20) + "/" + (max / 20)));
