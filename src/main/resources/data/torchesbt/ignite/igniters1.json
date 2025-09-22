@@ -1,6 +1,5 @@
 {
   "items": [
-    "minecraft:flint_and_steel",
     "#torchesbt:strong_igniters"
   ],
   "ignite_amount": 100
